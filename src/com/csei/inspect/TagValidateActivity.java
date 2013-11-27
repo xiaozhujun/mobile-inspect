@@ -127,6 +127,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			});
 		        backbutton.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
+						backbutton.setBackgroundResource(R.drawable.btn_back_active);
 						finish();
 					}
 				});
