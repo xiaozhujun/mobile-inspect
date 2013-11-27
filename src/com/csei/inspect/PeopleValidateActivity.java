@@ -26,8 +26,7 @@ import android.widget.TextView;
 public class PeopleValidateActivity extends Activity{
 	Button read;// 按钮
 	String str = "", result = "";
-	/*TextView textfile;// 文本框*/
-	ListView textfile;
+	ListView rolestablelist;
 	int index = 0;// 字符索引
 	int count = 0;// 按钮计数器
 	MyRunnable myRunnable;
@@ -38,7 +37,7 @@ public class PeopleValidateActivity extends Activity{
 	TextView textview;
 	String fileDir;
 	String filename;
-	TextView showresult;
+	TextView showalert;
 	int cur_pos=0;
 	MyAdapter myadapter;
 	@Override
@@ -47,10 +46,10 @@ public class PeopleValidateActivity extends Activity{
 	  setContentView(R.layout.peoplevalidate);
 	  fileDir=Environment.getExternalStorageDirectory().toString();
 	  read = (Button) findViewById(R.id.read);
-	  textfile = (ListView) findViewById(R.id.textfile);
+	  rolestablelist = (ListView) findViewById(R.id.rolestablelist);
 	  pb = (ProgressBar) findViewById(R.id.pb);
 	  textview = (TextView) findViewById(R.id.textview);
-	  showresult=(TextView) findViewById(R.id.showresult);
+	  showalert=(TextView) findViewById(R.id.showalert);
 	  getFile();
 	  // 调用得到文件的方法
 	  pb.setMax(result.length());// 进度条最大值设为文章的长度
@@ -79,7 +78,12 @@ public class PeopleValidateActivity extends Activity{
 	    super.handleMessage(msg);
 	    switch (msg.what) {
 	    case 1:
-	      String[] s=result.split(",");
+			drawRolesTableListView();
+	       break; 
+	    }
+	   }
+	private void drawRolesTableListView() {
+		String[] s=result.split(",");
 	      final ArrayList<HashMap<String, Object>> listItem=new ArrayList<HashMap<String,Object>>();
 		     for(int i=0;i<s.length;i++){
 		    	 HashMap<String, Object> map=new HashMap<String,Object>();
@@ -95,18 +99,17 @@ public class PeopleValidateActivity extends Activity{
 	     // 如果读取结束，则重新读取
 	    if (index == result.length()) {
 	       index = 0;	     
-	       /*new AlertDialog.Builder(PeopleValidateActivity.this).setMessage("文件扫描完毕!").show();*/
-	       showresult.setText("文件扫描完毕!");      
-	       textfile.setAdapter(listItemAdapter);	       
-	       textfile.setOnItemClickListener(new OnItemClickListener() {
+	       showalert.setText("文件扫描完毕!");      
+	       rolestablelist.setAdapter(listItemAdapter);	       
+	       rolestablelist.setOnItemClickListener(new OnItemClickListener() {
 				@SuppressWarnings({ "rawtypes", "unchecked" })
 				public void onItemClick(AdapterView<?> parent, View view, int position,
 						long id) {
-					showresult.setVisibility(View.GONE);
+					showalert.setVisibility(View.GONE);
 					cur_pos=position;                          
                     myadapter=new MyAdapter(PeopleValidateActivity.this, listItem, cur_pos);
-        			textfile.setAdapter(myadapter);
-        			textfile.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                    rolestablelist.setAdapter(myadapter);
+                    rolestablelist.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 					ListView listview=(ListView) parent;
 					HashMap<String,String>map=(HashMap<String, String>) listview.getItemAtPosition(position);
 					String tbname=map.get("ItemText");				
@@ -131,10 +134,7 @@ public class PeopleValidateActivity extends Activity{
 			});
 	       tag=2;	   
 	    }
-	       break; 
-	    }
-	   
-	   }
+	}
 	  };
 	  
 	}

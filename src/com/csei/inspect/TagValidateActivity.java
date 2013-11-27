@@ -5,14 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import com.cesi.analysexml.ParseXml;
 import com.csei.adapter.MyexpandableListAdapter;
 import com.csei.adapter.SelectAdapter;
 import com.example.viewpager.R;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Gravity;
@@ -24,20 +22,21 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 public class TagValidateActivity extends Activity implements ExpandableListView.OnChildClickListener,ExpandableListView.OnGroupClickListener{
-	Button scanTag;              //扫描标签按钮
-	String result;                
+	Button scanTag;              //扫描标签按钮               
 	RadioGroup inspectResult;          //右侧的点检结果列表
     RadioButton checkRadioButton;
 	SelectAdapter selectAdapter;     //响应点击左侧listview中的每一项显示右侧点检结果选项的适配器
@@ -73,10 +72,11 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	private boolean isOpenPop = false;
 	private PopupWindow window;
 	private ListView list;
-	private LinearLayout title_layout;
+	private RelativeLayout title_layout;
 	public static final String KEY = "key";
 	ArrayList<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
 	Context mContext;
+	Button beizhu;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -109,30 +109,25 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			showalert=(TextView) this.findViewById(R.id.showalert);
 			backbutton=(Button) this.findViewById(R.id.backbutton);
 			devnum=(TextView) this.findViewById(R.id.devnum);
+			beizhu = (Button) this.findViewById(R.id.beizhu);
+			beizhu.setOnClickListener(new ClickEvent());
 			String dnumber=scanDevnum();
 			devnum.setText(dnumber);
 			user=(TextView) this.findViewById(R.id.username);
 			user.setText(username);
 			mContext=this;
 			arrow = (ImageView) findViewById(R.id.arrow);
-			title_layout = (LinearLayout) findViewById(R.id.title_layout);
+			title_layout =  (RelativeLayout) findViewById(R.id.title_layout);
 			title_layout.setOnClickListener(new OnClickListener() {
-
-				public void onClick(View v) {
+                public void onClick(View v) {
 					// TODO Auto-generated method stub
-			
-					changPopState(v);
+                      changPopState(v);
 
 				}
 			});
 		        backbutton.setOnClickListener(new OnClickListener() {
-					
 					public void onClick(View v) {
-						// TODO Auto-generated method stub
-						Button b=(Button)v;
-						b.setBackgroundResource(R.drawable.btn_back_active);
-						Intent intent=new Intent(TagValidateActivity.this, PeopleValidateActivity.class);
-						startActivity(intent);
+						finish();
 					}
 				});
 			InitData();
@@ -163,7 +158,8 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					    		   inspectItem.setOnChildClickListener(new OnChildClickListener() {
 									public boolean onChildClick(ExpandableListView parent, View v,
 											int groupPosition, int childPosition, long id) {
-										// TODO Auto-generated method stub			
+										// TODO Auto-generated method stub	
+										 showalert.setVisibility(View.GONE);
 									     itemItem=childList.get(groupPosition).get(childPosition);																			
 										String value=p.getValueFromXmlByItem(filename, itemItem);										
 										inspectResultPane.setVisibility(View.VISIBLE);
@@ -198,6 +194,51 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		}
    
 	}
+	// 处理按键事件
+		class ClickEvent implements OnClickListener {
+			public void onClick(View v) {
+				if (v == beizhu) {
+					showRoundCornerDialog(TagValidateActivity.this, TagValidateActivity.this
+							.findViewById(R.id.beizhu));
+				}
+			}
+		}
+		// 显示圆角对话框
+		public void showRoundCornerDialog(Context context, View parent) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+			// 获取圆角对话框布局View，背景设为圆角
+			final View dialogView = inflater.inflate(R.layout.popupwindow, null,
+					false);
+			dialogView.setBackgroundResource(R.drawable.rounded_corners_view);
+			// 创建弹出对话框，设置弹出对话框的背景为圆角
+			final PopupWindow pw = new PopupWindow(dialogView, 400,
+					LayoutParams.WRAP_CONTENT, true);
+			pw.setBackgroundDrawable(getResources().getDrawable(
+					R.drawable.rounded_corners_pop));	
+			// 注：上面的设背景操作为重点部分，可以自行注释掉其中一个或两个设背景操作，查看对话框效果
+			final EditText edtUsername = (EditText) dialogView
+					.findViewById(R.id.username_edit);
+			edtUsername.setHint("用户名..."); // 设置提示语
+			// OK按钮及其处理事件
+			Button btnOK = (Button) dialogView.findViewById(R.id.BtnOK);
+			btnOK.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					// 设置文本框内容
+					edtUsername.setText("username");			
+				}
+			});
+			// Cancel按钮及其处理事件
+			Button btnCancel = (Button) dialogView.findViewById(R.id.BtnCancel);
+			btnCancel.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					pw.dismiss();// 关闭
+				}
+			});
+			// 显示RoundCorner对话框
+			pw.showAtLocation(parent, Gravity.CENTER | Gravity.CENTER, 0, 0);
+		}
 	
 	/**
 	 * 更改Pop状态
@@ -249,8 +290,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			}
 		});
 		window.update();
-		/*window.showAtLocation(parent, Gravity.CENTER_HORIZONTAL | Gravity.TOP,
-				0, (int) getResources().getDimension(R.dimen.pop_layout_y));*/
 		window.showAtLocation(parent, Gravity.RIGHT | Gravity.TOP,
 				0, (int) getResources().getDimension(R.dimen.pop_layout_y));
 	}
@@ -388,10 +427,12 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	public boolean onGroupClick(final ExpandableListView parent, final View v,
 			int groupPosition, final long id) {
 		if(isInspect==false){
+			showalert.setVisibility(View.VISIBLE);
 			showalert.setText("请扫描标签!");
 		}
 		if(isScaned==2){
 			inspectItem.collapseGroup(groupPosition);
+			showalert.setVisibility(View.VISIBLE);
 			showalert.setText("与所扫描标签不符!");
 			inspectResultPane.setVisibility(View.GONE);
 		}
@@ -401,9 +442,11 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			int groupPosition, int childPosition, long id) {
 		  
 		if(isInspect==false){
+			showalert.setVisibility(View.VISIBLE);
 			showalert.setText("请扫描标签!");
 		}
 		if(isScaned==2){
+			showalert.setVisibility(View.VISIBLE);
 			showalert.setText("与所扫描标签不符!");
 		}
 		return true;

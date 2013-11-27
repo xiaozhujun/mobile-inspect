@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.example.viewpager.R;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+@SuppressLint("UseSparseArrays")
 public class MyAdapter extends BaseAdapter {  
 	Context context;
 	ArrayList<HashMap<String, Object>> listData;
