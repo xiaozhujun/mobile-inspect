@@ -27,9 +27,10 @@
     <string name="normal">正常</string>
     <string name="abnormal">异常</string>
     <string name="nothing">无</string>
-    <string-array name = "spinner_array">
-        <item>选择</item> 
-       <item>保存</item>  
-        <item>退出</item>  
-    </string-array>
+    <string name="scanTagTitle">标签扫描</string>
+    <string name="peoplevalidate">人员身份验证</string>
+    <string name="startscan">开始扫描</string>
+    <string name="scanTag">扫描标签</string>
+    <string name="beizhu">请输入备注</string>
+    <string name="str_title">主菜单</string>
 </resources>

@@ -6,7 +6,9 @@ import java.util.HashMap;
 import com.example.viewpager.R;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,11 +52,14 @@ public class MyAdapter extends BaseAdapter {
         convertView = mInflater.inflate(R.layout.rolestable, null, false); 
         ImageView img=(ImageView) convertView.findViewById(R.id.ItemImage);
         TextView tv = (TextView) convertView  
-                .findViewById(R.id.ItemText);// 显示文字  
+                .findViewById(R.id.ItemText);// 显示文字
+        Resources resources=context.getResources();
+        Drawable btnDrawable=resources.getDrawable(R.drawable.item);
+        img.setImageDrawable(btnDrawable);
         tv.setText((String)listData.get(position).get("ItemText"));        
         if (position == cur_pos) {// 如果当前的行就是ListView中选中的一行，就更改显示样式  
-            convertView.setBackgroundColor(Color.LTGRAY);// 更改整行的背景色  
-            tv.setTextColor(Color.GREEN);// 更改字体颜色  
+            convertView.setBackgroundColor(Color.DKGRAY);// 更改整行的背景色  
+            tv.setTextColor(Color.WHITE);// 更改字体颜色  
             
         }  
         return convertView;  

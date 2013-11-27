@@ -3,73 +3,88 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-<LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="40dp" 
-    android:background="@color/weightGray"
-    android:orientation="horizontal"
-    >
-    <TextView
-        android:id="@+id/peopletitle"
+
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_marginTop="10dp"
-        android:textColor="@color/white"
-        android:text="人员身份验证" 
-       />
-    
-</LinearLayout>
-<LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="60dp" 
-    android:background="@color/weightGray"
-    android:orientation="vertical"
-    android:layout_marginTop="1dp"
-    >
-<ProgressBar 
- android:id="@+id/pb"
- android:layout_width="fill_parent"
- android:layout_height="wrap_content"
- android:layout_marginTop="10dp"
- android:max="100" 
- style="?android:attr/progressBarStyleHorizontal"      
- />
-<TextView 
- android:id="@+id/textview"   
- android:layout_width="fill_parent"
- android:layout_height="wrap_content"
- android:textSize="20sp"
- android:textColor="@color/white"
- />
-</LinearLayout>
-<!-- <TextView 
+        android:layout_height="40dp"
+        android:background="@color/weightGray"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/peopletitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/peoplevalidate"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="1dp"
+        android:background="@color/weightGray"
+        android:orientation="vertical" >
+
+        <ProgressBar
+            android:id="@+id/pb"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:progressDrawable="@drawable/barcolor"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/textview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+    <!--
+     <TextView 
     android:id="@+id/textfile"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    /> -->
+    />
+    -->
+
     <LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent" 
-    android:orientation="vertical"
-    android:layout_marginTop="1dp"
-    android:layout_weight="0.28"
-    android:background="@color/Grey"
-    >
-    <ListView
-        android:id="@+id/textfile"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:cacheColorHint="@null"
-        android:dividerHeight="1dp"
-         >
-    </ListView>
-    </LinearLayout>
-   <Button 
-  android:id="@+id/read"
-  android:layout_width="fill_parent"
-  android:layout_height="wrap_content"
-  android:text="开始扫描"
- />
-</LinearLayout>
+        android:layout_marginTop="1dp"
+        android:layout_weight="0.28"
+        android:background="@color/Grey"
+        android:orientation="vertical" >
 
+        <ListView
+            android:id="@+id/textfile"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="@null"
+            android:dividerHeight="1dp" >
+        </ListView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/Grey"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/showresult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/read"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/startscan" />
+
+</LinearLayout>

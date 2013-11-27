@@ -2,7 +2,10 @@ package com.csei.adapter;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.viewpager.R;
+
+import android.R.color;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +13,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 public class MyexpandableListAdapter extends BaseExpandableListAdapter {
+	@SuppressWarnings("unused")
 	private Context context;
 	private LayoutInflater inflater;
 	ArrayList<String> groupList;
@@ -60,10 +64,14 @@ public class MyexpandableListAdapter extends BaseExpandableListAdapter {
 		}
 		groupHolder.textView.setText(getGroup(groupPosition).toString());
 		if (isExpanded)// ture is Expanded or false is not isExpanded
+			{
 			groupHolder.imageView.setImageResource(R.drawable.expanded);
-		else
+		    convertView.setBackgroundColor(Color.GRAY);
+			}else{
 			groupHolder.imageView.setImageResource(R.drawable.collapse);
-		return convertView;
+			convertView.setBackgroundColor(Color.LTGRAY);			
+			}
+			return convertView;
 	}
 	public View getChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {

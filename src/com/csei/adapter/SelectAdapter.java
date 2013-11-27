@@ -44,9 +44,7 @@ public class SelectAdapter extends BaseAdapter {
 		LayoutInflater mInflater = LayoutInflater.from(context);
 		convertView = mInflater.inflate(R.layout.inspect, null);
 		TextView resultitem = (TextView) convertView.findViewById(R.id.ItemResult);
-		System.out.println(position+"++++++++++");
 		for(int i=0;i<listData.size();i++){
-		System.out.println((String) listData.get(i).get("ItemResult")+"-------------");
 		resultitem.setText((String) listData.get(i).get("ItemResult"));
 		}
 	    final CheckBox check = (CheckBox) convertView.findViewById(R.id.item_cb);
@@ -64,7 +62,6 @@ public class SelectAdapter extends BaseAdapter {
 				 String item=(String)listData.get(position).get("ItemText");
 				 String value=(String) listData.get(position).get("ItemResult");
 				 p.updateInspectXml(filename,item, value);
-				 int t=buttonView.getId();
 				if (isChecked) {
 					state.put(position, isChecked);
 					
