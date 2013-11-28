@@ -123,10 +123,11 @@ public class ParseXml {
 	}
 	
     @SuppressWarnings("unchecked")
-	public void updateInspectXml(String filename,String itrel,String val){    
+	public void updateInspectXml(String filename,String itrel,String val,String tag){    
     	//每次当选择值时将点检项以及选择的值写入inspect.xml中   
     	System.out.println(filename+"::"+itrel+"::"+val);
 			String item = null;
+			String loc=null;
 			SAXReader saxReader = new SAXReader();
 			try {
 				Document document = saxReader.read(new File(filename));
@@ -137,6 +138,8 @@ public class ParseXml {
 				while (it2.hasNext()) {
 					Element e5 = it2.next();
 					List<Element> elements = e5.elements();
+					loc = e5.attribute("name").getValue();
+					if(loc.equals(tag)){
 					Iterator<Element> it = elements.iterator();
 					while (it.hasNext()) {
 						Element e = it.next();
@@ -148,6 +151,7 @@ public class ParseXml {
 							Element ge = git.next();						
 						    ge.attribute("name").setValue(val);							
 						}	
+					}
 					}
 					}
 				}
@@ -168,6 +172,61 @@ public class ParseXml {
 				e.printStackTrace();
 			}  
 			
+    }
+    @SuppressWarnings("unchecked")
+	public void writeCommentToXml(String filename,String itrel,String comment,String tag){
+    	String item = null;
+    	String loc=null;
+		SAXReader saxReader = new SAXReader();
+		try {
+			Document document = saxReader.read(new File(filename));
+			Element root = document.getRootElement();	           				        			  
+			Element e1 = root.element("devicetype"); 
+            List<Element> e2 = e1.elements();
+			Iterator<Element> it2 = e2.iterator();
+			while (it2.hasNext()) {
+				Element e5 = it2.next();
+				List<Element> elements = e5.elements();
+				loc = e5.attribute("name").getValue();
+				if(loc.equals(tag)){
+				Iterator<Element> it = elements.iterator();
+				while (it.hasNext()) {
+					Element e = it.next();
+					item = e.attribute("name").getValue();
+					List<Element> group = e.elements();
+					Iterator<Element> git = group.iterator();
+				    if(item.equals(itrel)){
+					while (git.hasNext()) {
+						Element ge = git.next();						
+					    ge.attribute("comment").setValue(comment);							
+					}	
+				}
+				}
+				}
+			}
+			try{
+    			OutputFormat format=OutputFormat.createPrettyPrint();
+    			String ENCODING="UTF-8";
+    			format.setEncoding(ENCODING);
+    			format.setNewlines(true);
+    			XMLWriter writer=new XMLWriter(new java.io.FileOutputStream(filename),format);
+    			writer.write(document);
+    			writer.close();	
+    	}catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+			
+		  }catch (DocumentException e) {
+			e.printStackTrace();
+		}  
+    	
+    	
+    	
+    	
+    	
+    	
+    	
     }
     public void writeToInspectXml(String pathname){      
     	//将结果写入xml文件
@@ -218,7 +277,9 @@ public class ParseXml {
 							Element ge = git.next();
 							e.remove(ge);														
 			        }
-						e.addElement("value").addAttribute("name", "正常");	
+						Element value=e.addElement("value");
+						value.addAttribute("name", "正常");
+						value.addAttribute("comment", "");
 				}
 			}
 			try{

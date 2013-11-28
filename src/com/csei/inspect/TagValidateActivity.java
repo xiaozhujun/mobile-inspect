@@ -7,16 +7,20 @@ import java.util.List;
 import java.util.Map;
 import com.cesi.analysexml.ParseXml;
 import com.csei.adapter.MyexpandableListAdapter;
-import com.csei.adapter.SelectAdapter;
 import com.example.viewpager.R;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.InputType;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -39,7 +43,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	Button scanTag;              //扫描标签按钮               
 	RadioGroup inspectResult;          //右侧的点检结果列表
     RadioButton checkRadioButton;
-	SelectAdapter selectAdapter;     //响应点击左侧listview中的每一项显示右侧点检结果选项的适配器
 	int cur_pos=0;               //主要用于判断当前的position，以使当前的listview中的Item高亮
 	String username=null;         //获取点检人员
 	int uid=0;                    //获取点检人员ID
@@ -195,7 +198,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 											// TODO Auto-generated method stub
 											checkRadioButton=(RadioButton) inspectResult.findViewById(checkedId);						
 											String v=(String) checkRadioButton.getText();
-											p.updateInspectXml(filename, itemItem, v);
+											p.updateInspectXml(filename, itemItem, v,tag);
 										}
 									});
 					    		   }
@@ -216,6 +219,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 				if (v == beizhu) {
 					showRoundCornerDialog(TagValidateActivity.this, TagValidateActivity.this
 							.findViewById(R.id.beizhu));
+					
 				}
 			}
 		}
@@ -229,20 +233,24 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					false);
 			dialogView.setBackgroundResource(R.drawable.rounded_corners_view);
 			// 创建弹出对话框，设置弹出对话框的背景为圆角
-			final PopupWindow pw = new PopupWindow(dialogView, 400,
+			final PopupWindow pw = new PopupWindow(dialogView,LayoutParams.FILL_PARENT,
 					LayoutParams.WRAP_CONTENT, true);
-			pw.setBackgroundDrawable(getResources().getDrawable(
-					R.drawable.rounded_corners_pop));	
+			pw.setOutsideTouchable(true);
+			pw.setAnimationStyle(R.style.PopupAnimation);
+			/*pw.setBackgroundDrawable(getResources().getDrawable(
+					R.drawable.rounded_corners_pop));	*/
 			// 注：上面的设背景操作为重点部分，可以自行注释掉其中一个或两个设背景操作，查看对话框效果
 			final EditText edtUsername = (EditText) dialogView
 					.findViewById(R.id.username_edit);
-			edtUsername.setHint("用户名..."); // 设置提示语
+			edtUsername.setHint("请输入备注..."); // 设置提示语
 			// OK按钮及其处理事件
 			Button btnOK = (Button) dialogView.findViewById(R.id.BtnOK);
 			btnOK.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					// 设置文本框内容
-					edtUsername.setText("username");			
+					String comment=edtUsername.getText().toString();
+					p.writeCommentToXml(filename, itemItem, comment,tag);
+					pw.dismiss();
 				}
 			});
 			// Cancel按钮及其处理事件

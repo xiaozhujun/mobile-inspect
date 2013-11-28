@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/poptitle"
 	android:layout_width="fill_parent" android:layout_height="wrap_content"
 	android:orientation="vertical">
 	<TextView
@@ -20,6 +20,7 @@
 	    android:layout_height="123dp"
 	    android:layout_marginLeft="10dip"
 	    android:layout_marginRight="10dip"
+	    android:gravity="top"
 	    android:background="@android:color/white"
 	    android:capitalize="none"
 	     />
