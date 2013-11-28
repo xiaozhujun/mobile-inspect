@@ -159,9 +159,11 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					    		   inspectItem.setOnChildClickListener(new OnChildClickListener() {
 									public boolean onChildClick(ExpandableListView parent, View v,
 											int groupPosition, int childPosition, long id) {
-										// TODO Auto-generated method stub	
-										 showalert.setVisibility(View.GONE);
-									     itemItem=childList.get(groupPosition).get(childPosition);																			
+										// TODO Auto-generated method stub		        
+									     itemItem=childList.get(groupPosition).get(childPosition);
+									    boolean f=judgeIsBelongToScanTag(filename,itemItem,tag);
+									    if(f){
+									    showalert.setVisibility(View.GONE);
 										String value=p.getValueFromXmlByItem(filename, itemItem);										
 										inspectResultPane.setVisibility(View.VISIBLE);
 										if(normal.getText().equals(value)){
@@ -170,9 +172,22 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 											abnormal.setChecked(true);
 										}else if(nothing.getText().equals(value)){
 											nothing.setChecked(true);
-										}				
+										}
+									     }else{
+									    	 showalert.setVisibility(View.VISIBLE);
+											 showalert.setText("点检项不属于所扫描标签!");
+											 inspectResultPane.setVisibility(View.GONE);
+									     }
 										
 									     return false;
+									}
+
+									private boolean judgeIsBelongToScanTag(
+											String filename, String itemItem,
+											String tag) {
+										     boolean flag=false;
+										    	flag=p.judgeItemIsBelong(filename, tag, itemItem);	 
+		                                         return flag;	
 									}
 								});
 					    		   inspectResult.setOnCheckedChangeListener(new OnCheckedChangeListener() {

@@ -379,14 +379,10 @@ public class ParseXml {
 		     Iterator it=itemlist.iterator();
 		     while(it.hasNext()){
 		    	 String insitem=(String) it.next();
-		    	 System.out.println(item+"1111");
-		    	 System.out.println(insitem+"2222");
-		    	 if(item.equals(insitem)){
-		    		 System.out.println("haha");
+		    	 if(item.equals(insitem)){		    	
 		    		 flag=true;
 		    	 }
 		     }
-		     System.out.println(flag+">>>>");
 		       return flag;
 	}
 	@SuppressWarnings("unchecked")
