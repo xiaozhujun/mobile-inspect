@@ -19,6 +19,21 @@ public class DbModel {
     private String value;
     
     private String item;
+    
+    private String devicetype;
+    
+    private int devicetypenum;
+    
+    private String deviceNum;
+    
+    private String tagarea;
+    
+    private int tagareanum;
+    
+  //²Ù×÷Ô±¿¨Æ¬ÃÜÂë
+  	public static final String OP_PASSWORD = "212115212115";
+  	//ÇøÓò¿¨ÃÜÂë
+  	public static final String AREA_PASSWORD = "152121152121";
 
 	public int getRoleid() {
 		return roleid;
@@ -90,6 +105,46 @@ public class DbModel {
 
 	public void setItem(String item) {
 		this.item = item;
+	}
+
+	public String getDevicetype() {
+		return devicetype;
+	}
+
+	public void setDevicetype(String devicetype) {
+		this.devicetype = devicetype;
+	}
+
+	public int getDevicetypenum() {
+		return devicetypenum;
+	}
+
+	public void setDevicetypenum(int devicetypenum) {
+		this.devicetypenum = devicetypenum;
+	}
+
+	public String getDeviceNum() {
+		return deviceNum;
+	}
+
+	public void setDeviceNum(String deviceNum) {
+		this.deviceNum = deviceNum;
+	}
+
+	public String getTagarea() {
+		return tagarea;
+	}
+
+	public void setTagarea(String tagarea) {
+		this.tagarea = tagarea;
+	}
+
+	public int getTagareanum() {
+		return tagareanum;
+	}
+
+	public void setTagareanum(int tagareanum) {
+		this.tagareanum = tagareanum;
 	}
     
 	

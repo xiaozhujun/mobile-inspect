@@ -1,5 +1,7 @@
 package com.cesi.analysexml;
 import android.annotation.SuppressLint;
+import android.util.Log;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 public class ParseXml {
 	@SuppressWarnings("unchecked")
-	public List<DbModel> parseRolesTable(String filename){    
+	public List<DbModel> parseRolesTable(String filename,int rid){    
 		//此方法主要在于将选中的RolesTablexml文件进行解析
 		SAXReader saxReader = new SAXReader();
 		List<DbModel> list=new ArrayList<DbModel>();
@@ -27,6 +29,8 @@ public class ParseXml {
               while(it.hasNext()) {  
                Element e = it.next();  
                System.out.println(e.getName() + " : " + e.attribute("name").getValue() + " -- " + e.attribute("roleNum").getValue());  
+               int roleid=Integer.parseInt(e.attribute("roleNum").getValue());
+               if(roleid==rid){ 
                List<Element> group = e.elements();  
                Iterator<Element> git = group.iterator();  
                //所有的过程其实就是层层解析的过程  
@@ -39,6 +43,7 @@ public class ParseXml {
                    d.setTableitem(tableitem);
                    list.add(d);
                }  
+               }
            } 
          } catch (DocumentException e) {  
            e.printStackTrace();  

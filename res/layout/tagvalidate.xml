@@ -174,8 +174,18 @@
 		android:layout_alignParentRight="true"
 		android:text="@string/writebeizhu" />
 </RelativeLayout>
+ <Button
+        android:id="@+id/searchcard"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="寻卡" />
+  <Button
+        android:id="@+id/auth"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="验证" />
     <Button
-        android:id="@+id/scanTag"
+        android:id="@+id/startScan"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/scanTag" />

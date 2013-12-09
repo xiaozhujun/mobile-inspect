@@ -74,9 +74,18 @@
             android:textSize="15sp"
             android:text="" />
     </LinearLayout>
-
     <Button
-        android:id="@+id/read"
+        android:id="@+id/searchcard"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="寻卡" />
+    <Button
+        android:id="@+id/auth"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="验证" />
+    <Button
+        android:id="@+id/startScan"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/startscan" />

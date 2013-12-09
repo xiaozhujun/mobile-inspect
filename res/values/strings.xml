@@ -1,9 +1,9 @@
 <resources>
 
-    <string name="app_name">Inspect</string>
+    <string name="app_name">智能点检</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">智能点检</string>
     <string name="whats_new_msg1">"如你所知，
 起重机点检应当步入智能化"</string>
     <string name="whats_new_title2">"一切从本系统开始
