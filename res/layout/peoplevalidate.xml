@@ -3,12 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="40dp"
         android:background="@color/weightGray"
         android:orientation="horizontal" >
-
+        <Button
+		  android:id="@+id/backbutton"
+		  android:background="@drawable/btn_back"
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content"
+		  android:layout_margin="8dp"
+		  ></Button>
         <TextView
             android:id="@+id/peopletitle"
             android:layout_width="fill_parent"
@@ -16,8 +22,9 @@
             android:layout_marginTop="10dp"
             android:gravity="center"
             android:text="@string/peoplevalidate"
+            android:layout_centerInParent="true"
             android:textColor="@color/white" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -74,16 +81,6 @@
             android:textSize="15sp"
             android:text="" />
     </LinearLayout>
-    <Button
-        android:id="@+id/searchcard"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="寻卡" />
-    <Button
-        android:id="@+id/auth"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="验证" />
     <Button
         android:id="@+id/startScan"
         android:layout_width="fill_parent"

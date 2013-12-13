@@ -17,7 +17,7 @@ public class StartInspectActivity extends Activity {
 		{
 			@Override
 			public void run(){
-				int waitingTime=5000;
+				int waitingTime=1000;
 			try{
 				main_imageview.startAdmin();
 				while(waitingTime>0){

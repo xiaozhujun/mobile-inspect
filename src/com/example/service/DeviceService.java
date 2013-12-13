@@ -3,8 +3,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Timer;
-import java.util.TimerTask;
-
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,9 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
-
-
 import com.example.psam_demo.PSAM;
 import com.example.tools.Tools;
 /**
@@ -36,6 +31,7 @@ public class DeviceService extends Service {
 //	private Timer sendData;
 	private MyReceiver myReceive;  	//广播接收者
 	//射频开关计时器
+	@SuppressWarnings("unused")
 	private Timer stopRF;
 	public String activity = null; // 回传数据的activity
 	/**
@@ -60,6 +56,17 @@ public class DeviceService extends Service {
 						Log.e("data",data);
 						data_buffer.append(data);
 						data = null;
+						int strlen=data_buffer.length();
+						if(strlen<10){
+						if(data_buffer!=null){
+						Log.e("DeviceService data", data_buffer.toString());
+						Intent serviceIntent = new Intent();
+						serviceIntent.setAction(activity);
+						serviceIntent.putExtra("result", data_buffer.toString());
+						data_buffer.setLength(0);
+						sendBroadcast(serviceIntent);
+						} 
+						}else{
 						String dataLen = data_buffer.substring(2, 6); // 取得数据包的长度
 						Log.e("datalength", dataLen+"**" +data_buffer.toString());
 						if(Tools.checkData(dataLen, data_buffer.toString())){
@@ -73,13 +80,13 @@ public class DeviceService extends Service {
 						} 
 					}
 					}
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 					return;
 				}
 			}
-		}
-			
+		}	
 	}	
 	@Override
 	public IBinder onBind(Intent intent) {

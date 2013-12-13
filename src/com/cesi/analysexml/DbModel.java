@@ -31,9 +31,9 @@ public class DbModel {
     private int tagareanum;
     
   //²Ù×÷Ô±¿¨Æ¬ÃÜÂë
-  	public static final String OP_PASSWORD = "212115212115";
+  	public static final String OP_PASSWORD = "FFFFFFFFFFFF";
   	//ÇøÓò¿¨ÃÜÂë
-  	public static final String AREA_PASSWORD = "152121152121";
+  	public static final String AREA_PASSWORD = "FFFFFFFFFFFF";
 
 	public int getRoleid() {
 		return roleid;

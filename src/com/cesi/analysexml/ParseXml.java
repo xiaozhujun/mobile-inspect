@@ -1,7 +1,5 @@
 package com.cesi.analysexml;
 import android.annotation.SuppressLint;
-import android.util.Log;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

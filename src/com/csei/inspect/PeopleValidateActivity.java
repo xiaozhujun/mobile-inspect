@@ -9,12 +9,10 @@ import com.cesi.analysexml.DbModel;
 import com.cesi.analysexml.ParseXml;
 import com.csei.adapter.MyAdapter;
 import com.csei.util.Tools;
-import com.example.psam_demo.PSAM;
-import com.example.service.DeviceService;
+import com.example.service.RFIDService;
 import com.example.viewpager.R;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +35,7 @@ import android.widget.Toast;
 @SuppressLint("HandlerLeak")
 public class PeopleValidateActivity extends Activity implements OnClickListener{
 	Button read;// 按钮
+	Button backbutton;
 	String str = "", result = "";
 	ListView rolestablelist;
 	int index = 0;// 字符索引
@@ -52,13 +51,9 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	TextView showalert;
 	int cur_pos=0;
 	MyAdapter myadapter;
-	Button searchbtn;
-	Button authbtn;
 	Button startScan;
 	public String part_value = "00";				//块值，默认为0
 	public String password_type = "00";				//默认密码A为00 
-	//SerialPort API
-	private PSAM mpsam;								//用于调用命令
 	private MyBroadcast myBroadcast;				//广播接收者
 	public static int cmd_flag = 0;				//操作状态  0为不做其他操作，1为寻卡，2为认证，3为读数据，4为写数据
 	public static int authentication_flag = 0;		//认证状态  0为认证失败和未认证  1为认证成功
@@ -68,114 +63,43 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	volatile boolean Thread_flag = false;
 	String username=null;
 	int uid;
+	byte[] auth_byte;
+	byte [] value_array;
+	String cardType="0x01";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
 	  setContentView(R.layout.peoplevalidate);
 	  fileDir=Environment.getExternalStorageDirectory().toString();
-	 /* read = (Button) findViewById(R.id.read);*/
 	  rolestablelist = (ListView) findViewById(R.id.rolestablelist);
 	  pb = (ProgressBar) findViewById(R.id.pb);
 	  textview = (TextView) findViewById(R.id.textview);
 	  showalert=(TextView) findViewById(R.id.showalert);
-	  /*getFile();*/
-	  // 调用得到文件的方法
-	  searchbtn=(Button) this.findViewById(R.id.searchcard);
-	  authbtn=(Button) this.findViewById(R.id.auth);
+	  backbutton=(Button) this.findViewById(R.id.backbutton);
 	  startScan=(Button) this.findViewById(R.id.startScan);
-	  searchbtn.setOnClickListener(this);
-	  authbtn.setOnClickListener(this);
 	  startScan.setOnClickListener(this);
-	}
-
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		Intent ac = new Intent();
-		ac.setAction("com.example.service.DeviceService");
-		ac.putExtra("activity", activity);
-		sendBroadcast(ac);  
-		Log.e(TAG, "send broadcast");	
-		byte []cmd = null; //用于存放指令
-		Intent sendToservice = new Intent(PeopleValidateActivity.this,DeviceService.class);  //用于发送指令
-		String sector_str = "01".toString().trim();   //Sector
-		String sector_hex;  //协议所要求的扇区
-		String value_str;
-		//获取扇区
-		int sector_int = Integer.parseInt(sector_str);                //Sector
-		int sector_int_temp = sector_int*4;                              
-		if( sector_int_temp > 15){     //协议传入的扇区是:扇区号*4的十六进制
-			sector_hex  = Integer.toHexString(sector_int_temp);
-		}else{
-			 sector_hex  ="0" +  Integer.toHexString(sector_int_temp);
-		}
-		//认证命令所需的数据
-		Log.e("auth1",password_type+ sector_hex+ "FFFFFFFFFFFF");
-		byte[] auth_byte = Tools.HexString2Bytes(password_type+ sector_hex+ "FFFFFFFFFFFF");
-		
-		//获取块值
-		int value = sector_int_temp + Integer.parseInt("01");
-		if(value > 15){
-			value_str = Integer.toHexString(value);
-		}else{
-			value_str = "0" + Integer.toHexString(value);
-		}
-		byte [] value_array = Tools.HexString2Bytes(value_str);  // 读、写数据块
-		switch (v.getId()){
-		case R.id.searchcard:
-		//先寻卡
-	    new AlertDialog.Builder(PeopleValidateActivity.this).setMessage("hah1").show();
-		cmd_flag = 1;  	   //寻卡标识为1
-		cmd = mpsam.rf_card(); //获取命令
-		String cmd_find_card = Tools.Bytes2HexString(cmd, cmd.length);
-		Log.e(TAG, cmd_find_card);
-		break;
-		case R.id.auth:
-        //先验证
-		new AlertDialog.Builder(PeopleValidateActivity.this).setMessage("hah2").show();
-		cmd_flag = 2;
-		cmd = mpsam.rf_authentication_cmd(auth_byte);
-		if(cmd == null){
-			Toast.makeText(getApplicationContext(), "send cmd fail!", Toast.LENGTH_SHORT).show();
-			return;
-		}
-		String sssss = Tools.Bytes2HexString(cmd, cmd.length);
-		Log.e(TAG + " auth cmd", sssss);   //Log 认证命令
-		break;
-		case R.id.startScan:
-		//再读取
-	     if(authentication_flag != 1){
-				Toast.makeText(getApplicationContext(), "Before reading the data for certification", Toast.LENGTH_SHORT).show();
-				return;
-			}	     
-			cmd_flag = 3;
-			Log.e("读块",value_array+"");
-			cmd = mpsam.rf_read_cmd(value_array);
-			if(cmd == null){
-				Toast.makeText(getApplicationContext(), "send cmd fail", Toast.LENGTH_SHORT).show();
-				return;
+	  backbutton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				backbutton.setBackgroundResource(R.drawable.btn_back_active);
+				finish();
 			}
-			break;
-		default:
-			break;
-		}
-		     sendToservice.putExtra("cmd", cmd);  //封装命令
-		     PeopleValidateActivity.this.startService(sendToservice); //发送命令到服务
-		
-		
+		});
+	}
+	public void onClick(View v) {
+		Intent sendToservice = new Intent(PeopleValidateActivity.this,RFIDService.class);
+		sendToservice.putExtra("cardType", "0x01");
+		sendToservice.putExtra("activity", activity);
+		startService(sendToservice); 
 	}
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		myBroadcast = new MyBroadcast();
-		mpsam = new PSAM();//实例化mpsam,用于调用协议封装命令
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("com.csei.inspect.PeopleValidateActivity");
 		registerReceiver(myBroadcast, filter); 		//注册广播接收者
 		super.onResume();
-
 	}
-	
-	
 	@Override
 	protected void onPause() {
 		// TODO Auto-generated method stub
@@ -183,16 +107,12 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		authentication_flag = 0;
 		unregisterReceiver(myBroadcast);  //卸载广播接收者
 		super.onPause();
-		Log.e("M1CARDPAUSE", "PAUSE");  
-		
-		
-	}
-	
+		Log.e("M1CARDPAUSE", "PAUSE");  	
+	}	
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		Intent stopService = new Intent();
-		stopService.setAction("com.example.service.DeviceService");
+		stopService.setAction("com.example.service.RFIDService");
 		stopService.putExtra("stopflag", true);
 		sendBroadcast(stopService);  //给服务发送广播,令服务停止
 		Log.e(TAG, "send stop");
@@ -204,85 +124,75 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	 *
 	 */
 	private class MyBroadcast extends BroadcastReceiver {
-
+		
+		private void readCard(String receivedata){
+			byte [] temp = Tools.HexString2Bytes(receivedata);
+			Log.e("receivedata",receivedata);
+			try {
+				Log.e("receivedata.getBytes",new String(receivedata.getBytes("UTF-8"))+":");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Log.e("temp",new String(temp));   
+			if(temp != null){
+//				if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
+				try {
+					int templen=new String(temp,"UTF-8").length();
+					if(templen<10){
+						//长度小于10
+					}else{
+					String ctype=new String(temp,"UTF-8").substring(0,4);
+					if(ctype.equals(cardType)){
+					showalert.setVisibility(View.GONE);
+					uid=Integer.parseInt(new String(temp,"UTF-8").substring(5,6));
+					username=new String(temp,"UTF-8").substring(6,9);
+					getFile(Integer.parseInt(new String(temp,"UTF-8").substring(4,5)));
+				    pb.setMax(result.length());// 进度条最大值设为文章的长度
+					count++;
+					    System.out.println("count=" + count);
+					    if (count % 2 == 1) {
+					     myRunnable = new MyRunnable();
+					     thread = new Thread(myRunnable);
+					     thread.start();
+					     // 启动线程
+					     tag = 0;
+					     startScan.setText("暂停扫描");
+					    }
+					    if (count % 2 == 0) {
+					     tag = 1;
+					     startScan.setText("开始扫描");
+					    }   
+					}else{
+						showalert.setVisibility(View.VISIBLE);
+						showalert.setText("卡类型有误!");
+					}
+					}
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
+				Toast.makeText(getApplicationContext(), "read data fail", Toast.LENGTH_SHORT).show();
+			}
+		}
+		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String receivedata = intent.getStringExtra("result"); // 服务返回的数据
+			String searchflag=intent.getStringExtra("searchflag");
+			String authflag=intent.getStringExtra("authflag");
+			if(searchflag.equals("01")){
+				showalert.setVisibility(View.VISIBLE);
+				showalert.setText("寻卡失败!");
+				
+			}else if(authflag.equals("01")){
+				showalert.setVisibility(View.VISIBLE);
+				showalert.setText("验证失败!");
+			}	
 			if (receivedata != null) {
-				switch (cmd_flag) {
-				case 1: // 寻卡返回数据
-					byte[] M1_cardarr = mpsam.resolveDataFromDevice(Tools
-							.HexString2Bytes(receivedata));  //解析数据
-					if (M1_cardarr != null) {
-						/*new AlertDialog.Builder(MainActivity.this).setMessage(Tools.Bytes2HexString(M1_cardarr,
-								M1_cardarr.length)).show();*/
-						Toast.makeText(getApplicationContext(), "get UID success",
-								Toast.LENGTH_SHORT).show();
-					} else {
-						Toast.makeText(getApplicationContext(), "get UID fail",
-								Toast.LENGTH_SHORT).show();
-					}
-
-					break;
-				case 2:  //认证返回数据
-					int auth_flag = mpsam.rf_check_data(Tools.HexString2Bytes(receivedata));
-					if(auth_flag != 0){
-						Toast.makeText(getApplicationContext(), "authentication fail", Toast.LENGTH_SHORT).show();
-						authentication_flag = 0;
-					}else{
-						Toast.makeText(getApplicationContext(), "authentication success", Toast.LENGTH_SHORT).show();
-						authentication_flag = 1;
-					}
-					break;
-				case 3:
-					byte [] temp = Tools.HexString2Bytes(receivedata);
-					Log.e("receivedata",receivedata);
-					try {
-						Log.e("receivedata.getBytes",new String(receivedata.getBytes("UTF-8"))+":");
-						
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					Log.e("temp",new String(temp));   
-					byte [] readbuffer = mpsam.resolveDataFromDevice(temp);
-					if(readbuffer != null){
-//						if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
-						String value_mbuffer = Tools.Bytes2HexString(readbuffer, readbuffer.length);
-						Log.e("redabufferjj",value_mbuffer+"");
-						try {
-							new AlertDialog.Builder(PeopleValidateActivity.this).setMessage(new String(Tools.HexString2Bytes(value_mbuffer),"UTF-8")).show();
-							new AlertDialog.Builder(PeopleValidateActivity.this).setMessage(new String(Tools.HexString2Bytes(value_mbuffer),"UTF-8").substring(4,5)).show();
-							uid=Integer.parseInt(new String(Tools.HexString2Bytes(value_mbuffer),"UTF-8").substring(5,6));
-							username=new String(Tools.HexString2Bytes(value_mbuffer),"UTF-8").substring(6,9);
-							getFile(Integer.parseInt(new String(Tools.HexString2Bytes(value_mbuffer),"UTF-8").substring(4,5)));
-						    pb.setMax(result.length());// 进度条最大值设为文章的长度
-							count++;
-							    System.out.println("count=" + count);
-							    if (count % 2 == 1) {
-							     myRunnable = new MyRunnable();
-							     thread = new Thread(myRunnable);
-							     thread.start();
-							     // 启动线程
-							     tag = 0;
-							     startScan.setText("暂停扫描");
-							    }
-							    if (count % 2 == 0) {
-							     tag = 1;
-							     startScan.setText("开始扫描");
-							    }   
-						
-						} catch (UnsupportedEncodingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						Log.e(TAG, value_mbuffer);
-					}else{
-						Toast.makeText(getApplicationContext(), "read data fail", Toast.LENGTH_SHORT).show();
-					}
-					break;
-				}
+				readCard(receivedata);
 				 handler = new Handler() {
 					   @Override
 					   public void handleMessage(Message msg) {
@@ -334,16 +244,15 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 									intent.putExtras(bundle);
 									startActivityForResult(intent, 0);
 								}
-								
-								
 							});
 					       tag=2;	   
 					    }
 					}
-					  };
-					  
+					  };  
+					}else{
+						showalert.setVisibility(View.VISIBLE);
+						showalert.setText("读取数据失败!");
 					}
-				
 		}
 	}
 	private class MyRunnable implements Runnable {
@@ -357,8 +266,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		    }
 		   }
 		  }
-}
-	      
+}	      
 	/**
 	 * 写数据验证,用于验证写入数据
 	 * @param src
@@ -373,6 +281,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	// 得到文件内容的方法，返回一个字符串
 		@SuppressWarnings("rawtypes")
 		public String getFile(int rid) {          //获取人员点检信息
+			result="";
 			ParseXml p=new ParseXml();
 			filename=fileDir+"/RolesTable.xml";
 				List<DbModel> list=p.parseRolesTable(filename,rid);
@@ -383,9 +292,5 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 			    }
 			return result;
 		}
-	
-	
-	
-	
 	}
 
