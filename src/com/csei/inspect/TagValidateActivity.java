@@ -41,9 +41,8 @@ import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-public class TagValidateActivity extends Activity implements ExpandableListView.OnChildClickListener,ExpandableListView.OnGroupClickListener, OnClickListener{
-	/*Button scanTag;              //扫描标签按钮               
-*/	RadioGroup inspectResult;          //右侧的点检结果列表
+public class TagValidateActivity extends Activity implements ExpandableListView.OnChildClickListener,ExpandableListView.OnGroupClickListener, OnClickListener{            
+	RadioGroup inspectResult;          //右侧的点检结果列表
     RadioButton checkRadioButton;
 	int cur_pos=0;               //主要用于判断当前的position，以使当前的listview中的Item高亮
 	String username=null;         //获取点检人员
@@ -82,8 +81,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	Context mContext;
 	Button beizhu;
 	Button startScan;
-	public String part_value = "00";				//块值，默认为0
-	public String password_type = "00";				//默认密码A为00 
 	private MyBroadcast myBroadcast;				//广播接收者
 	public static int cmd_flag = 0;				//操作状态  0为不做其他操作，1为寻卡，2为认证，3为读数据，4为写数据
 	public static int authentication_flag = 0;		//认证状态  0为认证失败和未认证  1为认证成功
@@ -93,12 +90,17 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	volatile boolean Thread_flag = false;
 	String dnum;
 	int areaid;
-	byte[] auth_byte;
-	byte [] value_array;
 	private TextView title;
+	String savefile="保存";
+	String exit="退出";
+	String cardType="0x02";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		init();
+	}
+	//初始化
+	private void init() {
 		TextView textview = new TextView(this);
 		setContentView(textview);
 		Bundle bundle = getIntent().getExtras();
@@ -108,54 +110,53 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		//模拟器上的
 		fileDir=Environment.getExternalStorageDirectory().toString();
 		int count = bundle.getInt("count");                   //接收ScanCardActivity传来的count值
-			if (count != 0) {                                  //若不是第一次跳转到这个页面，则进行下一逻辑，否则提示先进行身份验证
-		    tname = bundle.getString("tbname");        
-			filename=getFileNameByTableName(tname);                      //根据不同的tname来得到filename
-			username=bundle.getString("username");
-			uid=bundle.getInt("uid");
-			setContentView(R.layout.tagvalidate);                              //使用tagvalidate.xml资源文件
-			//以下是获取相应的资源
-			inspecttable=(TextView) this.findViewById(R.id.tbname);
-			inspecttable.setText(tname);
-			inspectItem =  (ExpandableListView) this.findViewById(R.id.inspectItem);
-			inspectResult = (RadioGroup) this.findViewById(R.id.insepctResult);
-			checkRadioButton=(RadioButton) this.findViewById(inspectResult.getCheckedRadioButtonId());
-			inspectResultPane=this.findViewById(R.id.inspectResultPane);
-			normal=(RadioButton) this.findViewById(R.id.normal);
-			abnormal=(RadioButton) this.findViewById(R.id.abnormal);
-			nothing=(RadioButton) this.findViewById(R.id.nothing);
-			showalert=(TextView) this.findViewById(R.id.showalert);
-			backbutton=(Button) this.findViewById(R.id.backbutton);
-			devnum=(TextView) this.findViewById(R.id.devnum);
-			beizhu = (Button) this.findViewById(R.id.beizhu);
-			startScan=(Button) this.findViewById(R.id.startScan);
-			title=(TextView) this.findViewById(R.id.title);
-			startScan.setOnClickListener(this);
-			beizhu.setOnClickListener(new ClickEvent());
-			user=(TextView) this.findViewById(R.id.username);
-			user.setText(username);
-			mContext=this;
-			arrow = (ImageView) findViewById(R.id.arrow);
-			title.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-					// TODO Auto-generated method stub
-                      changPopState(v);
+		if (count != 0) {                                  //若不是第一次跳转到这个页面，则进行下一逻辑，否则提示先进行身份验证
+		tname = bundle.getString("tbname");        
+		filename=getFileNameByTableName(tname);                      //根据不同的tname来得到filename
+		username=bundle.getString("username");
+		uid=bundle.getInt("uid");
+		setContentView(R.layout.tagvalidate);                              //使用tagvalidate.xml资源文件
+		//以下是获取相应的资源
+		inspecttable=(TextView) this.findViewById(R.id.tbname);
+		inspecttable.setText(tname);
+		inspectItem =  (ExpandableListView) this.findViewById(R.id.inspectItem);
+		inspectResult = (RadioGroup) this.findViewById(R.id.insepctResult);
+		checkRadioButton=(RadioButton) this.findViewById(inspectResult.getCheckedRadioButtonId());
+		inspectResultPane=this.findViewById(R.id.inspectResultPane);
+		normal=(RadioButton) this.findViewById(R.id.normal);
+		abnormal=(RadioButton) this.findViewById(R.id.abnormal);
+		nothing=(RadioButton) this.findViewById(R.id.nothing);
+		showalert=(TextView) this.findViewById(R.id.showalert);
+		backbutton=(Button) this.findViewById(R.id.backbutton);
+		devnum=(TextView) this.findViewById(R.id.devnum);
+		beizhu = (Button) this.findViewById(R.id.beizhu);
+		startScan=(Button) this.findViewById(R.id.startScan);
+		title=(TextView) this.findViewById(R.id.title);
+		startScan.setOnClickListener(this);
+		beizhu.setOnClickListener(new ClickEvent());
+		user=(TextView) this.findViewById(R.id.username);
+		user.setText(username);
+		mContext=this;
+		arrow = (ImageView) findViewById(R.id.arrow);
+		title.setOnClickListener(new OnClickListener() {
+		    public void onClick(View v) {
+				// TODO Auto-generated method stub
+		          changPopState(v);
 
+			}
+		});
+		    backbutton.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					backbutton.setBackgroundResource(R.drawable.btn_back_active);
+					finish();
 				}
 			});
-		        backbutton.setOnClickListener(new OnClickListener() {
-					public void onClick(View v) {
-						backbutton.setBackgroundResource(R.drawable.btn_back_active);
-						finish();
-					}
-				});
-			InitData();
-			adapter = new MyexpandableListAdapter(TagValidateActivity.this,groupList,childList);
-			inspectItem.setAdapter(adapter);
-			inspectItem.setOnChildClickListener(this);
-			inspectItem.setOnGroupClickListener(this);
-		}
-   
+		InitData();
+		adapter = new MyexpandableListAdapter(TagValidateActivity.this,groupList,childList);
+		inspectItem.setAdapter(adapter);
+		inspectItem.setOnChildClickListener(this);
+		inspectItem.setOnGroupClickListener(this);
+}
 	}
 	// 处理按键事件
 		class ClickEvent implements OnClickListener {
@@ -181,8 +182,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					LayoutParams.WRAP_CONTENT, true);
 			pw.setOutsideTouchable(true);
 			pw.setAnimationStyle(R.style.PopupAnimation);
-			/*pw.setBackgroundDrawable(getResources().getDrawable(
-					R.drawable.rounded_corners_pop));	*/
 			// 注：上面的设背景操作为重点部分，可以自行注释掉其中一个或两个设背景操作，查看对话框效果
 			final EditText edtUsername = (EditText) dialogView
 					.findViewById(R.id.username_edit);
@@ -229,7 +228,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			LayoutInflater lay = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View v = lay.inflate(R.layout.pop, null);
 			list = (ListView) v.findViewById(R.id.pop_list);
-
 			SimpleAdapter adapter = new SimpleAdapter(this, CreateData(),
 					R.layout.pop_list_item, new String[] { KEY },
 					new int[] { R.id.title });
@@ -247,7 +245,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		window.setFocusable(true);
 		window.setOutsideTouchable(false);
 		window.setOnDismissListener(new OnDismissListener() {
-
 			public void onDismiss() {
 				// TODO Auto-generated method stub
 				isOpenPop = false;
@@ -263,10 +260,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 				long id) {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map=(Map<String, Object>) parent.getItemAtPosition(position);
-			if(map.get(KEY).equals("保存")){
+			if(map.get(KEY).equals(savefile)){
 				Toast.makeText(mContext,"文件已"+map.get(KEY)+"", Toast.LENGTH_SHORT).show();
 				writeToXmlUserDateDvnum(filename);
-			}else if(map.get(KEY).equals("退出")){
+			}else if(map.get(KEY).equals(exit)){
 				Toast.makeText(mContext,"您好!正在"+map.get(KEY)+".......", Toast.LENGTH_SHORT).show();
 				System.exit(0);
 			}
@@ -278,10 +275,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	public ArrayList<Map<String, Object>> CreateData() {		
 		Map<String, Object> map;
 		map = new HashMap<String, Object>();
-		map.put(KEY, "保存");
+		map.put(KEY, savefile);
 		items.add(map);
 		map = new HashMap<String, Object>();
-		map.put(KEY, "退出");
+		map.put(KEY, exit);
 		items.add(map);		
 		return items;
 	}
@@ -405,7 +402,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 }
 	public void onClick(View v) {
 		Intent sendToservice = new Intent(TagValidateActivity.this,RFIDService.class);
-		sendToservice.putExtra("cardType", "0x02");
+		sendToservice.putExtra("cardType", cardType);
 		sendToservice.putExtra("activity", activity);
 		startService(sendToservice); 
 	}
@@ -486,7 +483,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 							String t=new String(temp,"UTF-8").substring(10,12);
 							showalert.setText("标签扫描完毕!");
 							   isInspect=true;   
-				    if(isInspect){
+				          if(isInspect){
 				    	     //一刷标签时，机会扫描Listview中的item
 				    		tag=t+"区域";				  
 				    		p.writeToFormatXml(filename);
@@ -525,7 +522,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 										
 									     return false;
 									}
-
+                                    //判断一个点检项是否属于某个区域
 									private boolean judgeIsBelongToScanTag(
 											String filename, String itemItem,
 											String tag) {

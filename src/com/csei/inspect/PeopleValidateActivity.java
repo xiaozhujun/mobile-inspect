@@ -34,26 +34,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 @SuppressLint("HandlerLeak")
 public class PeopleValidateActivity extends Activity implements OnClickListener{
-	Button read;// 按钮
 	Button backbutton;
-	String str = "", result = "";
-	ListView rolestablelist;
-	int index = 0;// 字符索引
-	int count = 0;// 按钮计数器
+	String str = "", result = "";       //result是一个全局变量，用于存放从RolesTable.xml中读取出来的值
+	ListView rolestablelist;              //显示RolesTable.xml中读取值的ListView
+	int index = 0;                        // 字符索引                                     
+	int count = 0;                        // 按钮计数器
 	MyRunnable myRunnable;
 	Handler handler;
 	Thread thread;
 	int tag = 0;// 标签
 	ProgressBar pb;
-	TextView textview;
-	String fileDir;
-	String filename;
-	TextView showalert;
-	int cur_pos=0;
-	MyAdapter myadapter;
-	Button startScan;
-	public String part_value = "00";				//块值，默认为0
-	public String password_type = "00";				//默认密码A为00 
+	TextView showprocess;                         //显示进度
+	String fileDir;                               //文件夹基路径,这里默认为SdCard
+	String filename;                              //文件名
+	TextView showalert;                             //提示 
+	int cur_pos=0;                                  //用于高亮显示
+	MyAdapter myadapter;                             //高亮显示的适配器
+	Button startScan;                               //开始扫描
 	private MyBroadcast myBroadcast;				//广播接收者
 	public static int cmd_flag = 0;				//操作状态  0为不做其他操作，1为寻卡，2为认证，3为读数据，4为写数据
 	public static int authentication_flag = 0;		//认证状态  0为认证失败和未认证  1为认证成功
@@ -63,31 +60,35 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	volatile boolean Thread_flag = false;
 	String username=null;
 	int uid;
-	byte[] auth_byte;
-	byte [] value_array;
 	String cardType="0x01";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
 	  setContentView(R.layout.peoplevalidate);
-	  fileDir=Environment.getExternalStorageDirectory().toString();
-	  rolestablelist = (ListView) findViewById(R.id.rolestablelist);
-	  pb = (ProgressBar) findViewById(R.id.pb);
-	  textview = (TextView) findViewById(R.id.textview);
-	  showalert=(TextView) findViewById(R.id.showalert);
-	  backbutton=(Button) this.findViewById(R.id.backbutton);
-	  startScan=(Button) this.findViewById(R.id.startScan);
-	  startScan.setOnClickListener(this);
-	  backbutton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				backbutton.setBackgroundResource(R.drawable.btn_back_active);
-				finish();
-			}
-		});
+	  init();
 	}
+	//初始化
+	private void init() {
+		  fileDir=Environment.getExternalStorageDirectory().toString();
+		  rolestablelist = (ListView) findViewById(R.id.rolestablelist);
+		  pb = (ProgressBar) findViewById(R.id.pb);
+		  showprocess = (TextView) findViewById(R.id.showprocess);
+		  showalert=(TextView) findViewById(R.id.showalert);
+		  backbutton=(Button) this.findViewById(R.id.backbutton);
+		  startScan=(Button) this.findViewById(R.id.startScan);
+		  startScan.setOnClickListener(this);
+		  //返回按钮
+		  backbutton.setOnClickListener(new OnClickListener() {
+		  public void onClick(View v) {
+					backbutton.setBackgroundResource(R.drawable.btn_back_active);
+					finish();
+				}
+			});
+	}
+	//点击开启服务
 	public void onClick(View v) {
 		Intent sendToservice = new Intent(PeopleValidateActivity.this,RFIDService.class);
-		sendToservice.putExtra("cardType", "0x01");
+		sendToservice.putExtra("cardType", cardType);
 		sendToservice.putExtra("activity", activity);
 		startService(sendToservice); 
 	}
@@ -124,17 +125,9 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	 *
 	 */
 	private class MyBroadcast extends BroadcastReceiver {
-		
+		//读卡
 		private void readCard(String receivedata){
-			byte [] temp = Tools.HexString2Bytes(receivedata);
-			Log.e("receivedata",receivedata);
-			try {
-				Log.e("receivedata.getBytes",new String(receivedata.getBytes("UTF-8"))+":");
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Log.e("temp",new String(temp));   
+			byte [] temp = Tools.HexString2Bytes(receivedata);		 
 			if(temp != null){
 //				if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
 				try {
@@ -144,13 +137,16 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					}else{
 					String ctype=new String(temp,"UTF-8").substring(0,4);
 					if(ctype.equals(cardType)){
+				    //隐藏提示
 					showalert.setVisibility(View.GONE);
+					//获取UId
 					uid=Integer.parseInt(new String(temp,"UTF-8").substring(5,6));
+					//获取UserName
 					username=new String(temp,"UTF-8").substring(6,9);
+					//读取RolesTable.xml
 					getFile(Integer.parseInt(new String(temp,"UTF-8").substring(4,5)));
 				    pb.setMax(result.length());// 进度条最大值设为文章的长度
 					count++;
-					    System.out.println("count=" + count);
 					    if (count % 2 == 1) {
 					     myRunnable = new MyRunnable();
 					     thread = new Thread(myRunnable);
@@ -169,7 +165,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					}
 					}
 				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}else{
@@ -192,7 +187,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 				showalert.setText("验证失败!");
 			}	
 			if (receivedata != null) {
-				readCard(receivedata);
+				 readCard(receivedata);
 				 handler = new Handler() {
 					   @Override
 					   public void handleMessage(Message msg) {
@@ -203,6 +198,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					       break; 
 					    }
 					   }
+					 //渲染ListView,将根据在卡中读取的rid从RolesTable.xml文件中查找出的内容加载到ListView中
 					private void drawRolesTableListView() {
 						String[] s=result.split(",");
 					      final ArrayList<HashMap<String, Object>> listItem=new ArrayList<HashMap<String,Object>>();
@@ -215,9 +211,8 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 						     SimpleAdapter listItemAdapter=new SimpleAdapter(PeopleValidateActivity.this,listItem,R.layout.rolestable,new String[]{"ItemImage","ItemText"},new int[]{R.id.ItemImage,R.id.ItemText});		          
 						 index++;
 					     pb.setProgress(index);
-					     textview.setText("当前进度:" + index + "/" + result.length());
-					     System.out.println("扫描........");
-					     textview.setTextSize(15);
+					     showprocess.setText("当前进度:" + index + "/" + result.length());
+					     showprocess.setTextSize(15);
 					     // 如果读取结束，则重新读取
 					    if (index == result.length()) {
 					       index = 0;	     
@@ -255,6 +250,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					}
 		}
 	}
+	//读取文件线程
 	private class MyRunnable implements Runnable {
 		  public void run() {
 		   while(tag==0) {

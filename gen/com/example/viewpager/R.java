@@ -156,10 +156,10 @@ public final class R {
         public static final int poptitle=0x7f0b001a;
         public static final int rolestablelist=0x7f0b0015;
         public static final int showalert=0x7f0b0016;
+        public static final int showprocess=0x7f0b0014;
         public static final int startScan=0x7f0b0017;
         public static final int tbname=0x7f0b0026;
         public static final int textView1=0x7f0b000e;
-        public static final int textview=0x7f0b0014;
         public static final int title=0x7f0b0019;
         public static final int title_layout=0x7f0b0022;
         public static final int title_tv=0x7f0b002f;

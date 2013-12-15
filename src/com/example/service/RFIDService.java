@@ -42,11 +42,11 @@ public class RFIDService extends Service {
 	private ReadThread mReadThread; // 读数据线程
 	public String TAG = "RFIDservice"; // Debug
     byte[] value_array;
-    String opSector="04";
-    String areaSector="08";
-    String authPeopSector="01";
-    String authAreaSector="02";
-    String val="01";
+    String opSector="04";           //人员卡经过处理后的验证所需的区值
+    String areaSector="08";           //区域卡经过处理后的验证所需的区值
+    String authPeopSector="01";    //读人员卡时的区值
+    String authAreaSector="02";   //读区域卡时的区值
+    String val="01";              //块值
     String readcardflag;
     String searchflag;                             
     String authflag;
