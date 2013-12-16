@@ -33,6 +33,7 @@ public class RFIDService extends Service {
 	private Timer searchCard; // 搜寻卡片计时器
 	private String activity;
 	private boolean run = true; // 线程结束标识
+	@SuppressWarnings("unused")
 	private boolean skip = false;
 	private int readOp = 0;
 	private final int SEARCH_CARD = 1; // 寻卡标识
@@ -47,34 +48,49 @@ public class RFIDService extends Service {
     String authPeopSector="01";    //读人员卡时的区值
     String authAreaSector="02";   //读区域卡时的区值
     String val="01";              //块值
+    String val1="02";
     String readcardflag;
     String searchflag;                             
     String authflag;
     String readflag;
+    String cardType;
+    String result=null;
+    String result1=null;
+    int readcount=2;
+    String[] resultArray=new String[2];
+    String re="";
 	private Handler mhandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			skip = true;
 			Bundle receiverData = msg.getData();
 			String rec = receiverData.getString("receiver");
+			Log.e("rec",rec);
 			String crd=receiverData.getString("card");
+			Log.e("crd",crd);
 			if (rec == null || "".equals(rec))
 				return;
 			Log.e(TAG + "  RECEIVER", rec);
+			handleCard(rec, crd,opSector,areaSector,authPeopSector,authAreaSector,val);
+			//startSearch(cardType);
+			skip = false;
+		}
+		private void handleCard(String rec, String crd,String opSector,String areaSector,String authPeopSector,String authAreaSector,String value) {
+			
 			switch (readOp) {
 			case SEARCH_CARD: // 得到寻卡结果,并进行认证
 				// 寻卡结果
 				if(crd.equals("01")){
-				searchflag=searchCard(rec,opSector);
+				searchCard(rec,opSector);
 				}else if(crd.equals("02")){
-				searchflag=searchCard(rec,areaSector);	
+				searchCard(rec,areaSector);	
 				}
 				break;
 			case AUTH_CARD: // 得到认证结果，并进行读数据
 				// 认证结果
 				if(crd.equals("01")){
-				authflag=authCard(rec,authPeopSector,val);
+				authCard(rec,authPeopSector,value);
 				}else if(crd.equals("02")){
-				authflag=authCard(rec,authAreaSector,val);
+				authCard(rec,authAreaSector,value);
 				}
 				break;
 			case READ_CARD:
@@ -86,21 +102,24 @@ public class RFIDService extends Service {
 				System.out.println(receive_buffer + "待转化的接受数据");
 				if (receive_buffer != null) {
 					// 返回读到的数据给请求者
-					Intent serviceIntent = new Intent();
-					serviceIntent.setAction(activity);
-					serviceIntent.putExtra("result", Tools.Bytes2HexString(
-							receive_buffer, receive_buffer.length));
-					Log.e("searchflag",searchflag+"");
-					Log.e("authflag",authflag+"");
-					serviceIntent.putExtra("searchflag", searchflag);
-					serviceIntent.putExtra("authflag", authflag);
-					sendBroadcast(serviceIntent);
-					return;
+					re+=Tools.Bytes2HexString(receive_buffer, receive_buffer.length);
+					readcount--;
+					if(readcount!=0&&readcount>0){
+				    Log.e("readcount",readcount+"");
+					Log.e("hahaha","测试");
+					startSearch(cardType,2);	
+					}	
+				}
+				if(readcount==0){
+				Intent serviceIntent = new Intent();
+				serviceIntent.setAction(activity);
+				serviceIntent.putExtra("result",re);
+				sendBroadcast(serviceIntent);
 				}
 			default:
 				break;
 			}
-			skip = false;
+			
 		}
 		private String searchCard(String rec,String sector) {      //寻卡
 		    String searchresult = "00";
@@ -138,15 +157,19 @@ public class RFIDService extends Service {
 				// 读数据
 				String sector_str =sector.toString().trim();
 				int sector_int = Integer.parseInt(sector_str);                //Sector
-				int sector_int_temp = sector_int*4;  
+				int sector_int_temp = sector_int*4; 
+				Log.e("block",block);
 				int value = sector_int_temp + Integer.parseInt(block);
+				Log.e("value",value+"");
 				String value_str;
 				if(value > 15){
 					value_str = Integer.toHexString(value);
 				}else{
 					value_str = "0" + Integer.toHexString(value);
 				}
+				Log.e("value_str",value_str);
 				value_array = Tools.HexString2Bytes(value_str);  // 读、写数据块
+			    Log.e("value_array",Tools.Bytes2HexString(value_array, value_array.length));
 				handlerCMD = mSerialPort.rf_read_cmd(value_array);
 				Log.e("read_cmd", Tools.Bytes2HexString(handlerCMD, handlerCMD.length));
 				readOp = READ_CARD;
@@ -167,7 +190,7 @@ public class RFIDService extends Service {
 		public void run() {
 			super.run();
 			while (run) {
-				if (!skip) {
+				/*if (!skip) {*/
 					int size;
 					try {
 						byte[] buffer = new byte[128];
@@ -204,14 +227,16 @@ public class RFIDService extends Service {
 										if(readcardflag.equals("01")){
 										bundle.putString("card", "01");
 									    }else if(readcardflag.equals("02")){
-									    bundle.putString("card", "02");	
+									    bundle.putString("card", "02");										
 									    }
 										msg.setData(bundle);
 										data_buffer.setLength(0);
 										msg.setData(bundle);
 										mhandler.sendMessage(msg);										
-										if(valid){											
+										if(valid){	
+											
 										}else{
+											//valid为false时停止线程
 											data_buffer.setLength(0);
 										}
 									}
@@ -222,7 +247,7 @@ public class RFIDService extends Service {
 						e.printStackTrace();
 						return;
 					}
-				}
+				/*}*/
 			}
 
 		}
@@ -286,17 +311,28 @@ public class RFIDService extends Service {
 	}
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		String cardType = intent.getStringExtra("cardType");
+	    cardType = intent.getStringExtra("cardType");
 		if (intent.getStringExtra("activity") != null) {
 			activity = intent.getStringExtra("activity");
 		}
 		Log.e("cardType", cardType);
+		re="";
+		readcount=2;
+		startSearch(cardType,1);
+		return 0;
+	}
+	private void startSearch(String cardType,int count) {
+		if(count==1){
+			val="01";
+		}else if(count==2){
+			val="02";
+		}
 		if (cardType.equals("0x01")) {
+			startSearchCard();
 			readcardflag="01";
-			startSearchCard();
 		} else if (cardType.equals("0x02")) {
-			readcardflag="02";
 			startSearchCard();
+			readcardflag="02";
 		} else {
 			Log.e("cardType", cardType + " is not right!0x01|0x02");
 			// 返回读到的数据给请求者
@@ -306,7 +342,6 @@ public class RFIDService extends Service {
 			serviceIntent.putExtra("result", "卡类型错误");
 			sendBroadcast(serviceIntent);
 		}
-		return 0;
 	}
 	@Override
 	public void onDestroy() {

@@ -445,47 +445,36 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String receivedata = intent.getStringExtra("result"); // 服务返回的数据
-			int searchflag=Integer.parseInt(intent.getStringExtra("searchflag"));
-			int authflag=Integer.parseInt(intent.getStringExtra("authflag"));
-			if(searchflag==1){
-				showalert.setVisibility(View.VISIBLE);
-				showalert.setText("寻卡失败!");
-				
-			}else if(authflag==1){
-				showalert.setVisibility(View.VISIBLE);
-				showalert.setText("验证失败!");
-			}	
 			if (receivedata != null) {
 					byte [] temp = Tools.HexString2Bytes(receivedata);
-					Log.e("receivedata",receivedata);
 					try {
-						Log.e("receivedata.getBytes",new String(receivedata.getBytes("UTF-8"))+":");
-						
-					} catch (UnsupportedEncodingException e) {
+						Log.e("temp",new String(temp,"UTF-8"));
+					} catch (UnsupportedEncodingException e1) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						e1.printStackTrace();
 					}
-					Log.e("temp",new String(temp));   
-					
 					if(temp != null){
 //						if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
 						try {
 						    //
 							int templen=new String(temp,"UTF-8").length();
 							if(templen<12){
-								showalert.setVisibility(View.VISIBLE);
-								showalert.setText("卡类型有误");
+								/*showalert.setVisibility(View.VISIBLE);
+								showalert.setText("卡类型有误");*/
 							}else{
 							dnum=new String(temp,"UTF-8").substring(0,9);
 							areaid=Integer.parseInt(new String(temp,"UTF-8").substring(9,10));
 							devnum.setText(dnum);
 						    //根据这个dnum和areaid在tags.xml中查出点检区域
-							String t=new String(temp,"UTF-8").substring(10,12);
+							String t=new String(temp,"UTF-8").substring(17,21);
+							if(t.equals("司机室区")){
+								t="司机室区域";
+							}
 							showalert.setText("标签扫描完毕!");
 							   isInspect=true;   
 				          if(isInspect){
 				    	     //一刷标签时，机会扫描Listview中的item
-				    		tag=t+"区域";				  
+				    		tag=t;				  
 				    		p.writeToFormatXml(filename);
 				    		for(int i=0;i<groupList.size();i++){
 					    	   if((groupList.get(i)).equals(tag)){					    		

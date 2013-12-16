@@ -81,7 +81,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		  backbutton.setOnClickListener(new OnClickListener() {
 		  public void onClick(View v) {
 					backbutton.setBackgroundResource(R.drawable.btn_back_active);
-					finish();
+					System.exit(0);
 				}
 			});
 	}
@@ -127,7 +127,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	private class MyBroadcast extends BroadcastReceiver {
 		//读卡
 		private void readCard(String receivedata){
-			byte [] temp = Tools.HexString2Bytes(receivedata);		 
+			byte [] temp = Tools.HexString2Bytes(receivedata);	
 			if(temp != null){
 //				if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
 				try {
@@ -176,7 +176,8 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String receivedata = intent.getStringExtra("result"); // 服务返回的数据
-			String searchflag=intent.getStringExtra("searchflag");
+			Log.e("ooooooo",receivedata+"");
+			/*String searchflag=intent.getStringExtra("searchflag");
 			String authflag=intent.getStringExtra("authflag");
 			if(searchflag.equals("01")){
 				showalert.setVisibility(View.VISIBLE);
@@ -185,7 +186,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 			}else if(authflag.equals("01")){
 				showalert.setVisibility(View.VISIBLE);
 				showalert.setText("验证失败!");
-			}	
+			}	*/
 			if (receivedata != null) {
 				 readCard(receivedata);
 				 handler = new Handler() {
