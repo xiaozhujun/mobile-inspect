@@ -60,7 +60,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	volatile boolean Thread_flag = false;
 	String username=null;
 	int uid;
-	String cardType="0x01";
+	String cardType="x1";
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
@@ -88,7 +88,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	//点击开启服务
 	public void onClick(View v) {
 		Intent sendToservice = new Intent(PeopleValidateActivity.this,RFIDService.class);
-		sendToservice.putExtra("cardType", cardType);
+		sendToservice.putExtra("cardType", "0x01");
 		sendToservice.putExtra("activity", activity);
 		startService(sendToservice); 
 	}
@@ -132,19 +132,19 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 //				if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
 				try {
 					int templen=new String(temp,"UTF-8").length();
-					if(templen<10){
-						//长度小于10
+					if(templen<8){
+						//长度小于8
 					}else{
-					String ctype=new String(temp,"UTF-8").substring(0,4);
+					String ctype=new String(temp,"UTF-8").substring(0,2);
 					if(ctype.equals(cardType)){
 				    //隐藏提示
 					showalert.setVisibility(View.GONE);
 					//获取UId
-					uid=Integer.parseInt(new String(temp,"UTF-8").substring(5,6));
+					uid=Integer.parseInt(new String(temp,"UTF-8").substring(2,3));
 					//获取UserName
-					username=new String(temp,"UTF-8").substring(6,9);
+					username=new String(temp,"UTF-8").substring(4,8);
 					//读取RolesTable.xml
-					getFile(Integer.parseInt(new String(temp,"UTF-8").substring(4,5)));
+					getFile(Integer.parseInt(new String(temp,"UTF-8").substring(3,4)));
 				    pb.setMax(result.length());// 进度条最大值设为文章的长度
 					count++;
 					    if (count % 2 == 1) {
@@ -278,6 +278,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	// 得到文件内容的方法，返回一个字符串
 		@SuppressWarnings("rawtypes")
 		public String getFile(int rid) {          //获取人员点检信息
+			Log.e("rid",rid+"");
 			result="";
 			ParseXml p=new ParseXml();
 			filename=fileDir+"/RolesTable.xml";

@@ -1,5 +1,7 @@
 package com.cesi.analysexml;
 import android.annotation.SuppressLint;
+import android.util.Log;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ public class ParseXml {
 	@SuppressWarnings("unchecked")
 	public List<DbModel> parseRolesTable(String filename,int rid){    
 		//此方法主要在于将选中的RolesTablexml文件进行解析
+		Log.e("ridx",rid+"");
 		SAXReader saxReader = new SAXReader();
 		List<DbModel> list=new ArrayList<DbModel>();
         try {  
@@ -28,6 +31,8 @@ public class ParseXml {
                Element e = it.next();  
                System.out.println(e.getName() + " : " + e.attribute("name").getValue() + " -- " + e.attribute("roleNum").getValue());  
                int roleid=Integer.parseInt(e.attribute("roleNum").getValue());
+               boolean t=roleid==rid;
+               Log.e("boolean",t+"");
                if(roleid==rid){ 
                List<Element> group = e.elements();  
                Iterator<Element> git = group.iterator();  
@@ -223,13 +228,6 @@ public class ParseXml {
 		  }catch (DocumentException e) {
 			e.printStackTrace();
 		}  
-    	
-    	
-    	
-    	
-    	
-    	
-    	
     }
     public void writeToInspectXml(String pathname){      
     	//将结果写入xml文件

@@ -241,7 +241,7 @@ public class RFIDService extends Service {
 										}
 									}
 								}
-							}, 50);
+							}, 5);
 						}
 					} catch (IOException e) {
 						e.printStackTrace();
