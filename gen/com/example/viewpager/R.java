@@ -240,6 +240,7 @@ public final class R {
     public static final class style {
         public static final int AppTheme=0x7f090002;
         public static final int PopupAnimation=0x7f090001;
+        public static final int mProgressDialog=0x7f090009;
         public static final int mytheme=0x7f090000;
         public static final int whats_new_icon=0x7f090008;
         public static final int whats_new_icon_msg=0x7f090007;

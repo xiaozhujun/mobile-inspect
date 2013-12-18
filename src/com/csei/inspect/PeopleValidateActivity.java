@@ -13,6 +13,7 @@ import com.example.service.RFIDService;
 import com.example.viewpager.R;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +32,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 @SuppressLint("HandlerLeak")
 public class PeopleValidateActivity extends Activity implements OnClickListener{
 	Button backbutton;
@@ -61,6 +61,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	String username=null;
 	int uid;
 	String cardType="x1";
+	private ProgressDialog shibieDialog; //识别搜索框
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
@@ -87,6 +88,11 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	}
 	//点击开启服务
 	public void onClick(View v) {
+		shibieDialog = new ProgressDialog(PeopleValidateActivity.this, R.style.mProgressDialog);
+		shibieDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		shibieDialog.setMessage("识别标签中...");
+		shibieDialog.setCancelable(false);
+		shibieDialog.show();
 		Intent sendToservice = new Intent(PeopleValidateActivity.this,RFIDService.class);
 		sendToservice.putExtra("cardType", "0x01");
 		sendToservice.putExtra("activity", activity);
@@ -130,6 +136,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 			byte [] temp = Tools.HexString2Bytes(receivedata);	
 			if(temp != null){
 //				if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
+				shibieDialog.cancel();
 				try {
 					int templen=new String(temp,"UTF-8").length();
 					if(templen<8){
@@ -168,7 +175,9 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					e.printStackTrace();
 				}
 			}else{
-				Toast.makeText(getApplicationContext(), "read data fail", Toast.LENGTH_SHORT).show();
+				showalert.setVisibility(View.VISIBLE);
+				showalert.setText("读取数据失败!");
+				shibieDialog.cancel();
 			}
 		}
 		
@@ -176,17 +185,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String receivedata = intent.getStringExtra("result"); // 服务返回的数据
-			Log.e("ooooooo",receivedata+"");
-			/*String searchflag=intent.getStringExtra("searchflag");
-			String authflag=intent.getStringExtra("authflag");
-			if(searchflag.equals("01")){
-				showalert.setVisibility(View.VISIBLE);
-				showalert.setText("寻卡失败!");
-				
-			}else if(authflag.equals("01")){
-				showalert.setVisibility(View.VISIBLE);
-				showalert.setText("验证失败!");
-			}	*/
 			if (receivedata != null) {
 				 readCard(receivedata);
 				 handler = new Handler() {

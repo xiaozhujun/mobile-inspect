@@ -109,6 +109,9 @@ public class RFIDService extends Service {
 					Log.e("hahaha","≤‚ ‘");
 					startSearch(cardType,2);	
 					}	
+				}else{
+					re=null;
+					readcount=0;
 				}
 				if(readcount==0){
 				Intent serviceIntent = new Intent();

@@ -13,6 +13,7 @@ import com.example.service.RFIDService;
 import com.example.tools.Tools;
 import com.example.viewpager.R;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -94,6 +95,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	String savefile="保存";
 	String exit="退出";
 	String cardType="0x02";
+	private ProgressDialog shibieDialog; //识别搜索框
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -113,6 +115,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		if (count != 0) {                                  //若不是第一次跳转到这个页面，则进行下一逻辑，否则提示先进行身份验证
 		tname = bundle.getString("tbname");        
 		filename=getFileNameByTableName(tname);                      //根据不同的tname来得到filename
+		p.writeToFormatXml(filename);
 		username=bundle.getString("username");
 		uid=bundle.getInt("uid");
 		setContentView(R.layout.tagvalidate);                              //使用tagvalidate.xml资源文件
@@ -363,6 +366,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	}
 	private void writeToXmlUserDateDvnum(String filename) {        //将username,uid,devnum,insepcttime写入xml文件
 		Date d=new Date(System.currentTimeMillis());
+		Log.e("koko",""+filename+tname+username+uid+dnum+d);
 		p.writeToXmlUserDateDvnum(filename,tname,username,uid,dnum,d);	
 	}   
 	public void writeFormatXml(String pathname){         //将指定格式的文件写入
@@ -401,6 +405,11 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		return true;
 }
 	public void onClick(View v) {
+		shibieDialog = new ProgressDialog(TagValidateActivity.this, R.style.mProgressDialog);
+		shibieDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		shibieDialog.setMessage("识别标签中...");
+		shibieDialog.setCancelable(false);
+		shibieDialog.show();
 		Intent sendToservice = new Intent(TagValidateActivity.this,RFIDService.class);
 		sendToservice.putExtra("cardType", cardType);
 		sendToservice.putExtra("activity", activity);
@@ -455,6 +464,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					}
 					if(temp != null){
 //						if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
+						shibieDialog.cancel();
 						try {
 						    //
 							int templen=new String(temp,"UTF-8").length();
@@ -462,8 +472,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 								/*showalert.setVisibility(View.VISIBLE);
 								showalert.setText("卡类型有误");*/
 							}else{
-							dnum=new String(temp,"UTF-8").substring(0,9);
-							areaid=Integer.parseInt(new String(temp,"UTF-8").substring(9,10));
+							String ctype=new String(temp,"UTF-8").substring(0,2);
+							if(ctype.equals("x2")){
+							dnum=new String(temp,"UTF-8").substring(2,11);
+							areaid=Integer.parseInt(new String(temp,"UTF-8").substring(11,12));
 							devnum.setText(dnum);
 						    //根据这个dnum和areaid在tags.xml中查出点检区域
 							String t=new String(temp,"UTF-8").substring(17,21);
@@ -475,7 +487,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 				          if(isInspect){
 				    	     //一刷标签时，机会扫描Listview中的item
 				    		tag=t;				  
-				    		p.writeToFormatXml(filename);
+				    		
 				    		for(int i=0;i<groupList.size();i++){
 					    	   if((groupList.get(i)).equals(tag)){					    		
 					    		   isScaned=1;
@@ -535,6 +547,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					    	   
 					    	   }				        					    	  
 				             }
+							}else{
+								showalert.setVisibility(View.VISIBLE);
+								showalert.setText("卡类型有误!");
+							}
 							}
 						} catch (UnsupportedEncodingException e) {
 							// TODO Auto-generated catch block
@@ -544,6 +560,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 				}else{
 					showalert.setVisibility(View.VISIBLE);
 					showalert.setText("读取数据失败!");
+					shibieDialog.cancel();
 				}
 			}
 		}

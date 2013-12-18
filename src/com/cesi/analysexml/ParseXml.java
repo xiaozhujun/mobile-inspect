@@ -333,27 +333,6 @@ public class ParseXml {
 		}  
     	return value;	
     }
-   
-	/*public String scanTag(String filename) {
-		//扫描标签
-		String tag = null;
-		SAXReader saxReader = new SAXReader();
-		try {	
-			Document document = saxReader.read(new File(filename));
-			Element root = document.getRootElement();	           
-			Element e1 = root.element("tag");	    
-			List<Element> e2 = e1.elements();
-			Iterator<Element> it2 = e2.iterator();
-			while (it2.hasNext()) {
-				Element e5 = it2.next();
-				
-				tag = e5.attribute("name").getValue();		    
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}	
-          return tag;
-	}*/
     @SuppressWarnings("unchecked")
 	public String scanTag(String filename) {
 		//扫描标签,从tag.xml取得
@@ -469,6 +448,7 @@ public class ParseXml {
 		return list;
 	}
 	public void writeToXmlUserDateDvnum(String filename,String dev,String username,int uid,String devnumber,Date inspecttime) {
+		Log.e("koko1",""+filename+dev+username+uid+devnumber+inspecttime);
 		SAXReader saxReader = new SAXReader();
 		try {
 			Document document = saxReader.read(new File(filename));
