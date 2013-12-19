@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import com.cesi.analysexml.DbModel;
 import com.cesi.analysexml.ParseXml;
-import com.csei.adapter.MyAdapter;
 import com.csei.util.Tools;
 import com.example.service.RFIDService;
 import com.example.viewpager.R;
@@ -49,7 +48,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	String fileDir;                               //文件夹基路径,这里默认为SdCard
 	String filename;                              //文件名
 	int cur_pos=0;                                  //用于高亮显示
-	MyAdapter myadapter;                             //高亮显示的适配器
 	Button startScan;                               //开始扫描
 	private MyBroadcast myBroadcast;				//广播接收者
 	public static int cmd_flag = 0;				//操作状态  0为不做其他操作，1为寻卡，2为认证，3为读数据，4为写数据
@@ -217,10 +215,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 								@SuppressWarnings({ "unchecked" })
 								public void onItemClick(AdapterView<?> parent, View view, int position,
 										long id) {
-									cur_pos=position;                          
-				                    myadapter=new MyAdapter(PeopleValidateActivity.this, listItem, cur_pos);
-				                    rolestablelist.setAdapter(myadapter);
-				                    rolestablelist.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+									view.setSelected(true);                         
 									ListView listview=(ListView) parent;
 									HashMap<String,String>map=(HashMap<String, String>) listview.getItemAtPosition(position);
 									String tbname=map.get("ItemText");				
