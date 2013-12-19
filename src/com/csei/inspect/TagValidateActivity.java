@@ -71,9 +71,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	RadioButton abnormal;
 	RadioButton nothing;
 	String itemItem;
-	String it;
-	String flag;
-	TextView showalert;
+	String groupItem;
 	Button backbutton;
 	TextView devnum;
 	private ImageView arrow;
@@ -133,7 +131,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		normal=(RadioButton) this.findViewById(R.id.normal);
 		abnormal=(RadioButton) this.findViewById(R.id.abnormal);
 		nothing=(RadioButton) this.findViewById(R.id.nothing);
-		showalert=(TextView) this.findViewById(R.id.showalert);
 		backbutton=(Button) this.findViewById(R.id.backbutton);
 		devnum=(TextView) this.findViewById(R.id.devnum);
 		beizhu = (Button) this.findViewById(R.id.beizhu);
@@ -292,7 +289,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
     @SuppressWarnings("rawtypes")
 	private void InitData() {
 		// TODO Auto-generated method stub
-    	int j=0;
     	List<String> taglist=p.queryLocationFromXml(filename);
     	Iterator t=taglist.iterator();
     	groupList = new ArrayList<String>();
@@ -300,18 +296,17 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
     	List<String> itemlist=new ArrayList<String>();
     	while(t.hasNext()){
     	tag=(String) t.next();
-		groupList.add(j+"."+tag);
-		j++;
+		groupList.add(tag);
     	}
 		childList = new ArrayList<List<String>>();
 		for (int i = 0; i < groupList.size(); i++) {
 			ArrayList<String> childTemp;
 				childTemp = new ArrayList<String>();
-				itemlist=p.queryItemFromXmlByTag(filename,groupList.get(i).substring(2,groupList.get(i).length()));
+				itemlist=p.queryItemFromXmlByTag(filename,groupList.get(i));
 				Iterator it=itemlist.iterator();
 				while(it.hasNext()){
 				String item=(String) it.next();
-				childTemp.add(i+"."+item);
+				childTemp.add(item);
 				}
 				childList.add(childTemp);			
 	}
@@ -360,13 +355,11 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	public boolean onGroupClick(final ExpandableListView parent, final View v,
 			int groupPosition, final long id) {
 		if(isInspect==false){
-			showalert.setVisibility(View.VISIBLE);
-			showalert.setText("请扫描标签!");
+			Toast.makeText(TagValidateActivity.this, "请扫描标签!", Toast.LENGTH_SHORT).show();
 		}
 		if(isScaned==2){
 			inspectItem.collapseGroup(groupPosition);
-			showalert.setVisibility(View.VISIBLE);
-			showalert.setText("与所扫描标签不符!");
+			Toast.makeText(TagValidateActivity.this, "与所扫描标签不符!", Toast.LENGTH_SHORT).show();
 			inspectResultPane.setVisibility(View.GONE);
 		}
 		return false;
@@ -375,12 +368,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			int groupPosition, int childPosition, long id) {
 		  
 		if(isInspect==false){
-			showalert.setVisibility(View.VISIBLE);
-			showalert.setText("请扫描标签!");
+			Toast.makeText(TagValidateActivity.this, "请扫描标签!", Toast.LENGTH_SHORT).show();
 		}
 		if(isScaned==2){
-			showalert.setVisibility(View.VISIBLE);
-			showalert.setText("与所扫描标签不符!");
+			Toast.makeText(TagValidateActivity.this, "与所扫描标签不符!", Toast.LENGTH_SHORT).show();
 		}
 		return true;
 }
@@ -462,16 +453,14 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 							if(t.equals("司机室区")){
 								t="司机室区域";
 							}
-							showalert.setText("标签扫描完毕!");
+							Toast.makeText(TagValidateActivity.this, "标签扫描完毕!", Toast.LENGTH_SHORT).show();
 							   isInspect=true;   
 				          if(isInspect){
 				    	     //一刷标签时，机会扫描Listview中的item
 				    		tag=t;				  
 				    		
 				    		for(int i=0;i<groupList.size();i++){
-				    			String tt=groupList.get(i).substring(2,groupList.get(i).length());
-					    	   if(tt.equals(tag)){				    
-					    		   it=groupList.get(i).substring(0,1);
+					    	   if(groupList.get(i).equals(tag)){				    
 					    		   isScaned=1;
 					    		   inspectItem.expandGroup(i);
 					    		   for(int j=0;j<groupList.size();j++){
@@ -485,12 +474,12 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 									public boolean onChildClick(ExpandableListView parent, View v,
 											int groupPosition, int childPosition, long id) {
 										// TODO Auto-generated method stub	
-									     itemItem=childList.get(groupPosition).get(childPosition).substring(2,childList.get(groupPosition).get(childPosition).length());
-									     flag=childList.get(groupPosition).get(childPosition).substring(0,1);
+									     itemItem=childList.get(groupPosition).get(childPosition);
+									     groupItem=groupList.get(groupPosition);
+									     Log.e("groupItem",groupItem);
 									     v.setSelected(true); 
-									    boolean f=judgeIsBelongToScanTag(filename,itemItem,tag,it,flag);
+									    boolean f=judgeIsBelongToScanTag(filename,itemItem,tag,groupItem);
 									    if(f){
-									    showalert.setVisibility(View.GONE);
 										String value=p.getValueFromXmlByItem(filename, itemItem,tag);										
 										inspectResultPane.setVisibility(View.VISIBLE);
 										if(normal.getText().equals(value)){
@@ -501,8 +490,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 											nothing.setChecked(true);
 										}
 									     }else{
-									    	 showalert.setVisibility(View.VISIBLE);
-											 showalert.setText("点检项不属于所扫描标签!");
+												Toast.makeText(TagValidateActivity.this, "点检项不属于所扫描标签!", Toast.LENGTH_SHORT).show();
 											 inspectResultPane.setVisibility(View.GONE);
 									     }
 										
@@ -511,9 +499,9 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
                                     //判断一个点检项是否属于某个区域
 									private boolean judgeIsBelongToScanTag(
 											String filename, String itemItem,
-											String tag,String it,String f) {
+											String tag,String groupItem) {
 										     boolean flag=false;
-										    	flag=p.judgeItemIsBelong(filename, tag, itemItem,it,f);	 
+										    	flag=p.judgeItemIsBelong(filename, tag, itemItem,groupItem);	 
 		                                         return flag;	
 									}
 								});
@@ -533,8 +521,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					    	   }				        					    	  
 				             }
 							}else{
-								showalert.setVisibility(View.VISIBLE);
-								showalert.setText("卡类型有误!");
+								Toast.makeText(TagValidateActivity.this, "卡类型有误!", Toast.LENGTH_SHORT).show();
 							}
 							}
 						} catch (UnsupportedEncodingException e) {
@@ -543,8 +530,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 						}
 					}
 				}else{
-					showalert.setVisibility(View.VISIBLE);
-					showalert.setText("读取数据失败!");
+					Toast.makeText(TagValidateActivity.this, "读取数据失败!", Toast.LENGTH_SHORT).show();
 					shibieDialog.cancel();
 				}
 			}

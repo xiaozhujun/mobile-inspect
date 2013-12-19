@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 @SuppressLint("HandlerLeak")
 public class PeopleValidateActivity extends Activity implements OnClickListener{
 	Button backbutton;
@@ -47,7 +48,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	TextView showprocess;                         //显示进度
 	String fileDir;                               //文件夹基路径,这里默认为SdCard
 	String filename;                              //文件名
-	TextView showalert;                             //提示 
 	int cur_pos=0;                                  //用于高亮显示
 	MyAdapter myadapter;                             //高亮显示的适配器
 	Button startScan;                               //开始扫描
@@ -74,7 +74,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		  rolestablelist = (ListView) findViewById(R.id.rolestablelist);
 		  pb = (ProgressBar) findViewById(R.id.pb);
 		  showprocess = (TextView) findViewById(R.id.showprocess);
-		  showalert=(TextView) findViewById(R.id.showalert);
 		  backbutton=(Button) this.findViewById(R.id.backbutton);
 		  startScan=(Button) this.findViewById(R.id.startScan);
 		  startScan.setOnClickListener(this);
@@ -144,8 +143,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					}else{
 					String ctype=new String(temp,"UTF-8").substring(0,2);
 					if(ctype.equals(cardType)){
-				    //隐藏提示
-					showalert.setVisibility(View.GONE);
 					//获取UId
 					uid=Integer.parseInt(new String(temp,"UTF-8").substring(2,3));
 					//获取UserName
@@ -167,16 +164,15 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					     startScan.setText("开始扫描");
 					    }   
 					}else{
-						showalert.setVisibility(View.VISIBLE);
-						showalert.setText("卡类型有误!");
+						Toast.makeText(PeopleValidateActivity.this, "卡类型有误!", Toast.LENGTH_SHORT).show();
+						
 					}
 					}
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
 			}else{
-				showalert.setVisibility(View.VISIBLE);
-				showalert.setText("读取数据失败!");
+				Toast.makeText(PeopleValidateActivity.this, "读取数据失败!", Toast.LENGTH_SHORT).show();
 				shibieDialog.cancel();
 			}
 		}
@@ -214,14 +210,13 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					     showprocess.setTextSize(15);
 					     // 如果读取结束，则重新读取
 					    if (index == result.length()) {
-					       index = 0;	     
-					       showalert.setText("文件扫描完毕!");      
+					       index = 0;	
+							Toast.makeText(PeopleValidateActivity.this, "文件扫描完毕!", Toast.LENGTH_SHORT).show();   
 					       rolestablelist.setAdapter(listItemAdapter);	       
 					       rolestablelist.setOnItemClickListener(new OnItemClickListener() {
 								@SuppressWarnings({ "unchecked" })
 								public void onItemClick(AdapterView<?> parent, View view, int position,
 										long id) {
-									showalert.setVisibility(View.GONE);
 									cur_pos=position;                          
 				                    myadapter=new MyAdapter(PeopleValidateActivity.this, listItem, cur_pos);
 				                    rolestablelist.setAdapter(myadapter);
@@ -244,8 +239,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 					}
 					  };  
 					}else{
-						showalert.setVisibility(View.VISIBLE);
-						showalert.setText("读取数据失败!");
+						Toast.makeText(PeopleValidateActivity.this, "读取数据失败!", Toast.LENGTH_SHORT).show();
 					}
 		}
 	}

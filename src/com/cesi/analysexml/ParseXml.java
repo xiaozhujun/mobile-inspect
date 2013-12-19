@@ -416,15 +416,17 @@ public class ParseXml {
     	     return list;	
     }
 	@SuppressWarnings("rawtypes")
-	public boolean judgeItemIsBelong(String filename,String tag, String item,String i,String f) {
+	public boolean judgeItemIsBelong(String filename,String tag, String item,String groupItem) {
 		// 判断点检项是否属于某个区域，标签
 		     boolean flag=false;
 		     List<String> itemlist=queryItemFromXmlByTag(filename, tag);
 		     Iterator it=itemlist.iterator();
 		     while(it.hasNext()){
 		    	 String insitem=(String) it.next();
-		    	 if(item.equals(insitem)&&i.equals(f)){		    	
+		    	 if(tag.equals(groupItem)){
+		    	 if(item.equals(insitem)){		    	
 		    		 flag=true;
+		    	 }
 		    	 }
 		     }
 		       return flag;
