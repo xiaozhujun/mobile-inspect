@@ -71,6 +71,8 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	RadioButton abnormal;
 	RadioButton nothing;
 	String itemItem;
+	String it;
+	String flag;
 	TextView showalert;
 	Button backbutton;
 	TextView devnum;
@@ -290,6 +292,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
     @SuppressWarnings("rawtypes")
 	private void InitData() {
 		// TODO Auto-generated method stub
+    	int j=0;
     	List<String> taglist=p.queryLocationFromXml(filename);
     	Iterator t=taglist.iterator();
     	groupList = new ArrayList<String>();
@@ -297,47 +300,22 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
     	List<String> itemlist=new ArrayList<String>();
     	while(t.hasNext()){
     	tag=(String) t.next();
-		groupList.add(tag);
+		groupList.add(j+"."+tag);
+		j++;
     	}
 		childList = new ArrayList<List<String>>();
 		for (int i = 0; i < groupList.size(); i++) {
 			ArrayList<String> childTemp;
-			if (i == 0) {
 				childTemp = new ArrayList<String>();
-				itemlist=p.queryItemFromXmlByTag(filename,"行走区域");
+				itemlist=p.queryItemFromXmlByTag(filename,groupList.get(i).substring(2,groupList.get(i).length()));
 				Iterator it=itemlist.iterator();
 				while(it.hasNext()){
 				String item=(String) it.next();
-				childTemp.add(item);
+				childTemp.add(i+"."+item);
 				}
-			} else if (i == 1) {
-				childTemp = new ArrayList<String>();
-				itemlist=p.queryItemFromXmlByTag(filename,"转盘区域");
-				Iterator it=itemlist.iterator();
-				while(it.hasNext()){
-				String item=(String) it.next();
-				childTemp.add(item);
-				}
-			} else if(i==2){
-				childTemp = new ArrayList<String>();
-				itemlist=p.queryItemFromXmlByTag(filename,"司机室区域");
-				Iterator it=itemlist.iterator();
-				while(it.hasNext()){
-				String item=(String) it.next();
-				childTemp.add(item);
-			}
-			}else{
-					childTemp = new ArrayList<String>();
-					itemlist=p.queryItemFromXmlByTag(filename,"臂架区域");
-					Iterator it=itemlist.iterator();
-					while(it.hasNext()){
-					String item=(String) it.next();
-					childTemp.add(item);	
-				}
-			}
-			childList.add(childTemp);
-		}		
+				childList.add(childTemp);			
 	}
+		}
 	//模拟器上的
 	private String getFileNameByTableName(String tname) {
 		if(tname.equals("机修人员点检表")){                     //这里根据选择的不同的表名来赋给相应的不同的filename
@@ -491,7 +469,9 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 				    		tag=t;				  
 				    		
 				    		for(int i=0;i<groupList.size();i++){
-					    	   if((groupList.get(i)).equals(tag)){					    		
+				    			String tt=groupList.get(i).substring(2,groupList.get(i).length());
+					    	   if(tt.equals(tag)){				    
+					    		   it=groupList.get(i).substring(0,1);
 					    		   isScaned=1;
 					    		   inspectItem.expandGroup(i);
 					    		   for(int j=0;j<groupList.size();j++){
@@ -505,12 +485,13 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 									public boolean onChildClick(ExpandableListView parent, View v,
 											int groupPosition, int childPosition, long id) {
 										// TODO Auto-generated method stub	
-									     itemItem=childList.get(groupPosition).get(childPosition);
+									     itemItem=childList.get(groupPosition).get(childPosition).substring(2,childList.get(groupPosition).get(childPosition).length());
+									     flag=childList.get(groupPosition).get(childPosition).substring(0,1);
 									     v.setSelected(true); 
-									    boolean f=judgeIsBelongToScanTag(filename,itemItem,tag);
+									    boolean f=judgeIsBelongToScanTag(filename,itemItem,tag,it,flag);
 									    if(f){
 									    showalert.setVisibility(View.GONE);
-										String value=p.getValueFromXmlByItem(filename, itemItem);										
+										String value=p.getValueFromXmlByItem(filename, itemItem,tag);										
 										inspectResultPane.setVisibility(View.VISIBLE);
 										if(normal.getText().equals(value)){
 											normal.setChecked(true);
@@ -530,9 +511,9 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
                                     //判断一个点检项是否属于某个区域
 									private boolean judgeIsBelongToScanTag(
 											String filename, String itemItem,
-											String tag) {
+											String tag,String it,String f) {
 										     boolean flag=false;
-										    	flag=p.judgeItemIsBelong(filename, tag, itemItem);	 
+										    	flag=p.judgeItemIsBelong(filename, tag, itemItem,it,f);	 
 		                                         return flag;	
 									}
 								});
