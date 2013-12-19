@@ -46,6 +46,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	RadioGroup inspectResult;          //右侧的点检结果列表
     RadioButton checkRadioButton;
 	int cur_pos=0;               //主要用于判断当前的position，以使当前的listview中的Item高亮
+	int cur_pos1=0;
 	String username=null;         //获取点检人员
 	int uid=0;                    //获取点检人员ID
     String filename=null;          //获取点检表，不同的点检表会出现不同的点检项
@@ -96,6 +97,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	String exit="退出";
 	String cardType="0x02";
 	private ProgressDialog shibieDialog; //识别搜索框
+	View view_Group;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -498,11 +500,13 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					    			   }
 					    		   }
 					    		   if(isScaned==1){
+					    		   inspectItem.setChoiceMode(ExpandableListView.CHOICE_MODE_SINGLE);
 					    		   inspectItem.setOnChildClickListener(new OnChildClickListener() {
 									public boolean onChildClick(ExpandableListView parent, View v,
 											int groupPosition, int childPosition, long id) {
-										// TODO Auto-generated method stub		        
+										// TODO Auto-generated method stub	
 									     itemItem=childList.get(groupPosition).get(childPosition);
+									     v.setSelected(true); 
 									    boolean f=judgeIsBelongToScanTag(filename,itemItem,tag);
 									    if(f){
 									    showalert.setVisibility(View.GONE);

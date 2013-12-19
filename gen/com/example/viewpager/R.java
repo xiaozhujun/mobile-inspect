@@ -115,6 +115,7 @@ public final class R {
         public static final int whatsnew_mail=0x7f02003d;
         public static final int whatsnew_news=0x7f02003e;
         public static final int whatsnew_right=0x7f02003f;
+        public static final int white=0x7f020041;
         public static final int white_dot=0x7f020040;
     }
     public static final class id {

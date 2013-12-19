@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <drawable name="white">#FFFFFFFF</drawable>
     <color name="white">#ffffff</color>
     <color name="lucensy">#00000001</color>
     <color name="translucency">#e0000000</color>
