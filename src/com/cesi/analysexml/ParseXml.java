@@ -487,5 +487,45 @@ public class ParseXml {
 		String s=format.format(d);
 		return s;
 	}
+	@SuppressWarnings("unchecked")
+	public String getBeiZhuFromInspectXml(String filename, String itrvalue,
+			String loc, String groupItem) {
+		// TODO Auto-generated method stub
+		String item = null;
+		String value = null;
+		String tag=null;
+		SAXReader saxReader = new SAXReader();
+		try {
+			Document document = saxReader.read(new File(filename));
+			Element root = document.getRootElement();	           
+			Element e1 = root.element("devicetype"); 
+            List<Element> e2 = e1.elements();
+			Iterator<Element> it2 = e2.iterator();
+			while (it2.hasNext()) {
+				Element e5 = it2.next();
+				tag = e5.attribute("name").getValue();
+				/*if(tag.equals(groupItem)){*/
+				if(tag.equals(loc)){
+				List<Element> elements = e5.elements();
+				Iterator<Element> it = elements.iterator();
+				while (it.hasNext()) {
+					Element e = it.next();
+					item = e.attribute("name").getValue();
+					List<Element> group = e.elements();
+					Iterator<Element> git = group.iterator();
+				    if(item.equals(itrvalue)){
+						Element ge = git.next();
+						value=ge.attribute("comment").getValue();							 							
+				}
+				}
+			}
+			}
+			/*}*/
+		  }catch (DocumentException e) {
+			e.printStackTrace();
+		}  
+    	return value;	
+		
+	}
 }
 	

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 import com.cesi.analysexml.ParseXml;
 import com.csei.adapter.MyexpandableListAdapter;
@@ -20,6 +22,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -98,6 +102,23 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	String cardType="0x02";
 	private ProgressDialog shibieDialog; //识别搜索框
 	View view_Group;
+	private Timer timerDialog;  //搜索框计时器
+	private Timer timeThread;
+	private int MSG_FLAG = 1;
+	//Dialog结束标识
+	private int MSG_OVER = 2;
+	String beizhustr;
+	private Handler mHandler = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			if(msg.what == MSG_FLAG){
+				
+			}else if(msg.what == MSG_OVER){
+				Toast.makeText(getApplicationContext(), "未识别到标签卡，请重试", Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -189,7 +210,9 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			// 注：上面的设背景操作为重点部分，可以自行注释掉其中一个或两个设背景操作，查看对话框效果
 			final EditText edtUsername = (EditText) dialogView
 					.findViewById(R.id.username_edit);
-			edtUsername.setHint("请输入备注..."); // 设置提示语
+			//在这里通过点击当前项，根据区域和点检项来查找相应的备注
+			
+			edtUsername.setHint(beizhustr); // 设置提示语
 			// OK按钮及其处理事件
 			Button btnOK = (Button) dialogView.findViewById(R.id.BtnOK);
 			btnOK.setOnClickListener(new OnClickListener() {
@@ -381,6 +404,17 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		shibieDialog.setMessage("识别标签中...");
 		shibieDialog.setCancelable(false);
 		shibieDialog.show();
+		timerDialog = new Timer();
+		//7秒后取消搜索
+		timerDialog.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				shibieDialog.cancel();
+				Message msg = new Message();
+				msg.what = MSG_OVER;
+				mHandler.sendMessage(msg);
+			}
+		}, 7000);
 		Intent sendToservice = new Intent(TagValidateActivity.this,RFIDService.class);
 		sendToservice.putExtra("cardType", cardType);
 		sendToservice.putExtra("activity", activity);
@@ -390,6 +424,16 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
+		timeThread = new Timer();
+		timeThread.schedule(new TimerTask() {
+			@Override
+			public void run() {
+//				String timeStr = Tools.getTime();
+				Message msg = new Message();
+				msg.what = MSG_FLAG;
+				mHandler.sendMessage(msg);
+			}
+		}, 0 , 1000);
 		myBroadcast = new MyBroadcast();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("com.csei.inspect.TagValidateActivity");
@@ -403,6 +447,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		authentication_flag = 0;
 		unregisterReceiver(myBroadcast);  //卸载广播接收者
 		super.onPause();
+		timeThread.cancel();
 		Log.e("M1CARDPAUSE", "PAUSE");  	
 	}
 	@Override
@@ -436,6 +481,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 					if(temp != null){
 //						if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
 						shibieDialog.cancel();
+						timerDialog.cancel();
 						try {
 						    //
 							int templen=new String(temp,"UTF-8").length();
@@ -489,6 +535,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 										}else if(nothing.getText().equals(value)){
 											nothing.setChecked(true);
 										}
+										beizhustr=p.getBeiZhuFromInspectXml(filename,itemItem,tag,groupItem);
 									     }else{
 												Toast.makeText(TagValidateActivity.this, "点检项不属于所扫描标签!", Toast.LENGTH_SHORT).show();
 											 inspectResultPane.setVisibility(View.GONE);

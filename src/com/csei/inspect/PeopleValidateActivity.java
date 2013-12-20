@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 import com.cesi.analysexml.DbModel;
 import com.cesi.analysexml.ParseXml;
@@ -60,6 +62,22 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	int uid;
 	String cardType="x1";
 	private ProgressDialog shibieDialog; //识别搜索框
+	private Timer timerDialog;  //搜索框计时器
+	private Timer timeThread;
+	private int MSG_FLAG = 1;
+	//Dialog结束标识
+	private int MSG_OVER = 2;
+	private Handler mHandler = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			if(msg.what == MSG_FLAG){
+				
+			}else if(msg.what == MSG_OVER){
+				Toast.makeText(getApplicationContext(), "未识别到标签卡，请重试", Toast.LENGTH_SHORT).show();
+			}
+		}
+	};
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	  super.onCreate(savedInstanceState);
@@ -90,6 +108,17 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		shibieDialog.setMessage("识别标签中...");
 		shibieDialog.setCancelable(false);
 		shibieDialog.show();
+		timerDialog = new Timer();
+		//7秒后取消搜索
+		timerDialog.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				shibieDialog.cancel();
+				Message msg = new Message();
+				msg.what = MSG_OVER;
+				mHandler.sendMessage(msg);
+			}
+		}, 7000);
 		Intent sendToservice = new Intent(PeopleValidateActivity.this,RFIDService.class);
 		sendToservice.putExtra("cardType", "0x01");
 		sendToservice.putExtra("activity", activity);
@@ -98,6 +127,18 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
+		timeThread = new Timer();
+		timeThread.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+//				String timeStr = Tools.getTime();
+				Message msg = new Message();
+				msg.what = MSG_FLAG;
+				mHandler.sendMessage(msg);
+				
+			}
+		}, 0 , 1000);
 		myBroadcast = new MyBroadcast();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("com.csei.inspect.PeopleValidateActivity");
@@ -111,6 +152,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		authentication_flag = 0;
 		unregisterReceiver(myBroadcast);  //卸载广播接收者
 		super.onPause();
+		timeThread.cancel();
 		Log.e("M1CARDPAUSE", "PAUSE");  	
 	}	
 	@Override
@@ -134,6 +176,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 			if(temp != null){
 //				if(read_data.getText().toString().length() > 30) read_data.setText("");  //读取下一个块时清空
 				shibieDialog.cancel();
+				timerDialog.cancel();
 				try {
 					int templen=new String(temp,"UTF-8").length();
 					if(templen<8){
