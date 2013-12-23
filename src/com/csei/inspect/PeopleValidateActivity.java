@@ -71,8 +71,7 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		@Override
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
-			if(msg.what == MSG_FLAG){
-				
+			if(msg.what == MSG_FLAG){	
 			}else if(msg.what == MSG_OVER){
 				Toast.makeText(getApplicationContext(), "未识别到标签卡，请重试", Toast.LENGTH_SHORT).show();
 			}
@@ -129,14 +128,12 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 		// TODO Auto-generated method stub
 		timeThread = new Timer();
 		timeThread.schedule(new TimerTask() {
-			
 			@Override
 			public void run() {
 //				String timeStr = Tools.getTime();
 				Message msg = new Message();
 				msg.what = MSG_FLAG;
 				mHandler.sendMessage(msg);
-				
 			}
 		}, 0 , 1000);
 		myBroadcast = new MyBroadcast();
@@ -217,7 +214,6 @@ public class PeopleValidateActivity extends Activity implements OnClickListener{
 				shibieDialog.cancel();
 			}
 		}
-		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub

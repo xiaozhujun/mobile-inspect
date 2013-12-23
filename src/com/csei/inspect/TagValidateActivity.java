@@ -14,6 +14,7 @@ import com.csei.adapter.MyexpandableListAdapter;
 import com.example.service.RFIDService;
 import com.example.tools.Tools;
 import com.example.viewpager.R;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -29,6 +30,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -46,6 +48,7 @@ import android.widget.PopupWindow.OnDismissListener;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
+@SuppressLint("HandlerLeak")
 public class TagValidateActivity extends Activity implements ExpandableListView.OnChildClickListener,ExpandableListView.OnGroupClickListener, OnClickListener{            
 	RadioGroup inspectResult;          //右侧的点检结果列表
     RadioButton checkRadioButton;
@@ -162,7 +165,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		user=(TextView) this.findViewById(R.id.username);
 		user.setText(username);
 		mContext=this;
-		arrow = (ImageView) findViewById(R.id.arrow);
+		arrow = (ImageView) findViewById(R.id.arrow); 
 		title.setOnClickListener(new OnClickListener() {
 		    public void onClick(View v) {
 				// TODO Auto-generated method stub
@@ -188,11 +191,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			public void onClick(View v) {
 				if (v == beizhu) {
 					showRoundCornerDialog(TagValidateActivity.this, TagValidateActivity.this
-							.findViewById(R.id.beizhu));
-					
+							.findViewById(R.id.beizhu));	
 				}
 			}
-		}
+		} 
 		// 显示圆角对话框
 		@SuppressWarnings("deprecation")
 		public void showRoundCornerDialog(Context context, View parent) {
@@ -211,9 +213,16 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 			final EditText edtUsername = (EditText) dialogView
 					.findViewById(R.id.username_edit);
 			//在这里通过点击当前项，根据区域和点检项来查找相应的备注
-			
 			edtUsername.setHint(beizhustr); // 设置提示语
 			// OK按钮及其处理事件
+			TextView beizhutitle=(TextView) dialogView.findViewById(R.id.username_view);
+			beizhutitle.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					//隐藏软键盘
+					 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE); 
+			         imm.hideSoftInputFromWindow(edtUsername.getWindowToken(),0);
+				}
+			});
 			Button btnOK = (Button) dialogView.findViewById(R.id.BtnOK);
 			btnOK.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -241,12 +250,10 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		if (isOpenPop) {
 			arrow.setBackgroundResource(R.drawable.icon_arrow_up);
 			popAwindow(v);
-
 		} else {
 			arrow.setBackgroundResource(R.drawable.icon_arrow_down);
 			if (window != null) {
 				window.dismiss();
-
 			}
 		}
 	}
@@ -312,6 +319,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
     @SuppressWarnings("rawtypes")
 	private void InitData() {
 		// TODO Auto-generated method stub
+    	//在这之中
     	List<String> taglist=p.queryLocationFromXml(filename);
     	Iterator t=taglist.iterator();
     	groupList = new ArrayList<String>();
@@ -364,13 +372,11 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	}
 	private void writeToXmlUserDateDvnum(String filename) {        //将username,uid,devnum,insepcttime写入xml文件
 		Date d=new Date(System.currentTimeMillis());
-		Log.e("koko",""+filename+tname+username+uid+dnum+d);
 		p.writeToXmlUserDateDvnum(filename,tname,username,uid,dnum,d);	
 	}   
 	public void writeFormatXml(String pathname){         //将指定格式的文件写入
 		p.writeToFormatXml(pathname);
 	}
-	
 	public List<String> queryLocationFromXml(){
 		List<String> list=p.queryLocationFromXml(filename);
 		return list;
@@ -389,7 +395,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 	}
 	public boolean onChildClick(ExpandableListView parent, View v,
 			int groupPosition, int childPosition, long id) {
-		  
 		if(isInspect==false){
 			Toast.makeText(TagValidateActivity.this, "请扫描标签!", Toast.LENGTH_SHORT).show();
 		}
@@ -420,7 +425,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 		sendToservice.putExtra("activity", activity);
 		startService(sendToservice); 
 	}
-	
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
@@ -486,15 +490,14 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 						    //
 							int templen=new String(temp,"UTF-8").length();
 							if(templen<12){
-								/*showalert.setVisibility(View.VISIBLE);
-								showalert.setText("卡类型有误");*/
+							    //长度小于12
 							}else{
 							String ctype=new String(temp,"UTF-8").substring(0,2);
 							if(ctype.equals("x2")){
 							dnum=new String(temp,"UTF-8").substring(2,11);
 							areaid=Integer.parseInt(new String(temp,"UTF-8").substring(11,12));
 							devnum.setText(dnum);
-						    //根据这个dnum和areaid在tags.xml中查出点检区域
+						    //根据这个DNUM和AreAid在tags.xml中查出点检区域
 							String t=new String(temp,"UTF-8").substring(17,21);
 							if(t.equals("司机室区")){
 								t="司机室区域";
@@ -502,7 +505,7 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 							Toast.makeText(TagValidateActivity.this, "标签扫描完毕!", Toast.LENGTH_SHORT).show();
 							   isInspect=true;   
 				          if(isInspect){
-				    	     //一刷标签时，机会扫描Listview中的item
+				    	     //一刷标签时，即会扫描ListView中的item
 				    		tag=t;				  
 				    		
 				    		for(int i=0;i<groupList.size();i++){
@@ -540,7 +543,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 												Toast.makeText(TagValidateActivity.this, "点检项不属于所扫描标签!", Toast.LENGTH_SHORT).show();
 											 inspectResultPane.setVisibility(View.GONE);
 									     }
-										
 									     return false;
 									}
                                     //判断一个点检项是否属于某个区域
@@ -582,7 +584,6 @@ public class TagValidateActivity extends Activity implements ExpandableListView.
 				}
 			}
 		}
-	
 	/**
 	 * 写数据验证,用于验证写入数据
 	 * @param src
